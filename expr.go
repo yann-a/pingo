@@ -1,5 +1,6 @@
 package main
 
+// Expressions
 type expr interface{}
 
 type parallel []expr
@@ -16,8 +17,12 @@ type lambda struct { // used to define anonymous channels
   channel string
   then expr
 }
+type sequence struct {
+  first expr;
+  then expr;
+}
 type print expr
 
-type skip int
+// Values
 type constant int
-type channel string
+type variable string

@@ -18,18 +18,34 @@ import (
   s string
 }
 
-%type <ret> expr
-%token LPAREN RPAREN DOT PIPE COMMA
+%type <ret> expr innerexpression
+%token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
 
+%left COLON
+%left PIPE
+
 %%
 
-top: expr         { fmt.Println($1)     }
+top: expr                                          { fmt.Println($1)           }
 
 expr:
-    INT           { $$ = constant($1)   }
-  | VAR           { $$ = channel($1)    }
+    innerexpression
+  | expr PIPE expr                                 {
+                                                      switch v := $1.(type) {
+                                                        case parallel: /* on met tous les process parallèles au même niveau */
+                                                          $$ = append([]expr(v), $3)
+                                                        default:
+                                                          $$ = parallel{$1, $3}
+                                                      }
+                                                   }
+
+innerexpression:
+    INT                                            { $$ = constant($1)         }
+  | VAR                                            { $$ = variable($1)         }
+  | LPAREN expr RPAREN                             { $$ = $2                   }
+  /* | innerexpression COLON innerexpression          { $$ = sequence{$1, $3}     } */
 
 
 %%
@@ -63,6 +79,8 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
       return PIPE
     case ',':
       return COMMA
+    case ';':
+      return COLON
     case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
       return x.num(c, yylval)
     case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
