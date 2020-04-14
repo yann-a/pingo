@@ -13,62 +13,23 @@ import (
 %}
 
 %union {
-	num expr
+	ret expr
+	num int
+	s string
 }
 
-%type	<num>	expr expr1 expr2 expr3
-
-%token '+' '-' '*' '/' '(' ')'
-
-%token	<num>	NUM
+%type <ret> expr
+%token LPAREN RPAREN DOT PIPE COMMA
+%token <num> INT
+%token <s> VAR
 
 %%
 
-top:
-	expr
-	{
-		fmt.Println($1)
-	}
+top: expr         { fmt.Println($1) }
 
 expr:
-	expr1
-|	'+' expr
-	{
-		$$ = $2
-	}
-|	'-' expr
-	{
-		$$ = - $2
-	}
-
-expr1:
-	expr2
-|	expr1 '+' expr2
-	{
-		$$ = $1 + $3
-	}
-|	expr1 '-' expr2
-	{
-		$$ = $1 - $3
-	}
-
-expr2:
-	expr3
-|	expr2 '*' expr3
-	{
-		$$ = $1 * $3
-	}
-|	expr2 '/' expr3
-	{
-		$$ = $1 / $3
-	}
-
-expr3:
-	NUM
-|	'(' expr ')'
-	{
-		$$ = $2
-	}
+		INT    			{ $$ = constant($1)   }
+	| VAR					{ $$ = channel($1) 	  }
 
 
 %%
@@ -92,18 +53,20 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
 		switch c {
 		case eof:
 			return eof
+		case '(':
+			return LPAREN
+		case ')':
+			return RPAREN
+		case '.':
+			return DOT
+		case '|':
+			return PIPE
+		case ',':
+			return COMMA
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			return x.num(c, yylval)
-		case '+', '-', '*', '/', '(', ')':
-			return int(c)
-
-		// Recognize Unicode multiplication and division
-		// symbols, returning what the parser expects.
-		case '×':
-			return '*'
-		case '÷':
-			return '/'
-
+		case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
+			return x.string(c, yylval)
 		case ' ', '\t', '\n', '\r':
 		default:
 			log.Printf("unrecognized character %q", c)
@@ -139,9 +102,36 @@ func (x *exprLex) num(c rune, yylval *exprSymType) int {
 		return eof
 	}
 
-	yylval.num = expr(v)
+	yylval.num = v
 
-	return NUM
+	return INT
+}
+
+// Lex a string.
+func (x *exprLex) string(c rune, yylval *exprSymType) int {
+	add := func(b *bytes.Buffer, c rune) {
+		if _, err := b.WriteRune(c); err != nil {
+			log.Fatalf("WriteRune: %s", err)
+		}
+	}
+	var b bytes.Buffer
+	add(&b, c)
+	L: for {
+		c = x.next()
+		switch c {
+		case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
+			add(&b, c)
+		default:
+			break L
+		}
+	}
+	if c != eof {
+		x.peek = c
+	}
+
+	yylval.s = b.String()
+
+	return VAR
 }
 
 // Return the next rune for the lexer.
