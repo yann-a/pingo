@@ -6,14 +6,14 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"math/big"
 	"unicode/utf8"
+	"strconv"
 )
 
 %}
 
 %union {
-	num *big.Rat
+	num expr
 }
 
 %type	<num>	expr expr1 expr2 expr3
@@ -27,11 +27,7 @@ import (
 top:
 	expr
 	{
-		if $1.IsInt() {
-			fmt.Println($1.Num().String())
-		} else {
-			fmt.Println($1.String())
-		}
+		fmt.Println($1)
 	}
 
 expr:
@@ -42,29 +38,29 @@ expr:
 	}
 |	'-' expr
 	{
-		$$ = $2.Neg($2)
+		$$ = - $2
 	}
 
 expr1:
 	expr2
 |	expr1 '+' expr2
 	{
-		$$ = $1.Add($1, $3)
+		$$ = $1 + $3
 	}
 |	expr1 '-' expr2
 	{
-		$$ = $1.Sub($1, $3)
+		$$ = $1 - $3
 	}
 
 expr2:
 	expr3
 |	expr2 '*' expr3
 	{
-		$$ = $1.Mul($1, $3)
+		$$ = $1 * $3
 	}
 |	expr2 '/' expr3
 	{
-		$$ = $1.Quo($1, $3)
+		$$ = $1 / $3
 	}
 
 expr3:
@@ -136,12 +132,15 @@ func (x *exprLex) num(c rune, yylval *exprSymType) int {
 	if c != eof {
 		x.peek = c
 	}
-	yylval.num = &big.Rat{}
-	_, ok := yylval.num.SetString(b.String())
-	if !ok {
+
+	v, err := strconv.Atoi(b.String())
+	if err != nil {
 		log.Printf("bad number %q", b.String())
 		return eof
 	}
+
+	yylval.num = expr(v)
+
 	return NUM
 }
 
