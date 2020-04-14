@@ -25,11 +25,11 @@ import (
 
 %%
 
-top: expr         { fmt.Println($1) }
+top: expr					{ fmt.Println($1) }
 
 expr:
-		INT    			{ $$ = constant($1)   }
-	| VAR					{ $$ = channel($1) 	  }
+	  INT						{ $$ = constant($1)   }
+		| VAR					{ $$ = channel($1) 	  }
 
 
 %%
