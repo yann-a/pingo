@@ -21,7 +21,7 @@ import (
 }
 
 %type <ret> expr innerexpression afterparenthesis
-%type <v> value
+%type <v> pattern
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
@@ -59,16 +59,15 @@ innerexpression:
                                                           $$ = privatize{string(v), $4}
                                                       }
                                                    }
-  | VAR LPAREN value RPAREN                        { $$ = send{$1, $3}        }
+  | VAR LPAREN pattern RPAREN DOT innerexpression  { $$ = receiveThen{$1, $3, $6} }
 
 afterparenthesis:
     innerexpression   /* définition d'un canal privé */
-  |                                               { $$ = nil                   }
+  |                                                { $$ = nil                  }
 
-value:
-    INT                                           { $$ = constant($1)          }
-  | VAR                                           { $$ = variable($1)          }
-  | value COMMA value                             { $$ = pair{$1, $3}          }
+pattern:
+    VAR                                            { $$ = variable($1)         }
+  | VAR COMMA VAR                                  { $$ = pair{variable($1), variable($3)} }
 
 
 %%
