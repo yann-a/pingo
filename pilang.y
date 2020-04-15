@@ -25,6 +25,7 @@ import (
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
+%token OUTPUT
 
 %left COMMA
 %left COLON
@@ -60,6 +61,7 @@ innerexpression:
                                                       }
                                                    }
   | VAR LPAREN pattern RPAREN DOT innerexpression  { $$ = receiveThen{$1, $3, $6} }
+  | OUTPUT VAR value                               { $$ = send{$2, $3}        }
 
 afterparenthesis:
     innerexpression   /* définition d'un canal privé */
@@ -103,6 +105,8 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
       return COMMA
     case ';':
       return COLON
+    case '^':
+      return OUTPUT
     case ' ', '\t', '\n', '\r':
     default:
       if unicode.IsLetter(c) {
