@@ -64,11 +64,12 @@ pattern: /* for reception */
 
 value: /* for sending */
     literal
-  | literal COMMA literal                          { $$ = pair{$1, $3}         }
+  | literal COMMA literal                          { $$ = pair{$1, $3}                     }
+  | LPAREN value RPAREN                            { $$ = $2                               }
 
 literal:
-    INT                                            { $$ = constant($1)         }
-  | VAR                                            { $$ = variable($1)         }
+    INT                                            { $$ = constant($1)                     }
+  | VAR                                            { $$ = variable($1)                     }
 
 
 
