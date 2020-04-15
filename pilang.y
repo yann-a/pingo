@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bufio"
   "bytes"
   "log"
   "unicode" // différencie les lettres des nombres
@@ -82,8 +83,7 @@ const eof = 0
 // the methods Lex(*<prefix>SymType) int and Error(string).
 type exprLex struct {
   ret expr
-  line []byte
-  peek rune
+  reader *bufio.Reader
 }
 
 // The parser calls this method to get each new token. This
@@ -116,6 +116,8 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
         return x.num(c, yylval)
       }
 
+      x.reader.UnreadRune()
+
       log.Printf("unrecognized character %q", c)
     }
   }
@@ -136,11 +138,12 @@ func (x *exprLex) num(c rune, yylval *exprSymType) int {
     case unicode.IsNumber(c):
       add(&b, c)
     default:
+      if c != eof {
+        x.reader.UnreadRune()
+      }
+
       break L
     }
-  }
-  if c != eof {
-    x.peek = c
   }
 
   v, err := strconv.Atoi(b.String())
@@ -169,11 +172,12 @@ func (x *exprLex) string(c rune, yylval *exprSymType) int {
     case unicode.IsLetter(c):
       add(&b, c)
     default:
+      if c != eof {
+        x.reader.UnreadRune()
+      }
+
       break L
     }
-  }
-  if c != eof {
-    x.peek = c
   }
 
   yylval.s = b.String()
@@ -187,20 +191,15 @@ func (x *exprLex) string(c rune, yylval *exprSymType) int {
 
 // Return the next rune for the lexer.
 func (x *exprLex) next() rune {
-  if x.peek != eof {
-    r := x.peek
-    x.peek = eof
-    return r
-  }
-  if len(x.line) == 0 {
-    return eof
-  }
-  c, size := utf8.DecodeRune(x.line)
-  x.line = x.line[size:]
+  c, size, err := x.reader.ReadRune()
   if c == utf8.RuneError && size == 1 {
     log.Print("invalid utf8")
     return x.next()
   }
+  if err != nil {
+    return eof
+  }
+
   return c
 }
 
