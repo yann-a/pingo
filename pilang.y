@@ -4,7 +4,6 @@ package main
 
 import (
   "bytes"
-  "fmt"
   "log"
   "unicode" // différencie les lettres des nombres
   "unicode/utf8"
@@ -36,7 +35,7 @@ import (
 
 %%
 
-top: expr                                          { $1           }
+top: expr                                          { $$ = $1           }
 
 expr:
     innerexpression

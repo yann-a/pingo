@@ -9,6 +9,11 @@ import (
 	"os"
 )
 
+func eval(e expr) value{
+	var v constant
+	return v
+}
+
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	for {
@@ -23,6 +28,6 @@ func main() {
 			log.Fatalf("ReadBytes: %s", err)
 		}
 
-		exprParse(&exprLex{line: line})
+		eval(exprParse(&exprLex{line: line}))
 	}
 }
