@@ -6,7 +6,7 @@ import (
   "bytes"
   "fmt"
   "log"
-  "unicode"
+  "unicode" // différencie les lettres des nombres
   "unicode/utf8"
   "strconv"
 )
@@ -15,15 +15,18 @@ import (
 
 %union {
   ret expr
+  v value
   num int
   s string
 }
 
 %type <ret> expr innerexpression afterparenthesis
+%type <v> value
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
 
+%left COMMA
 %left COLON
 %left PIPE
 
@@ -55,12 +58,17 @@ innerexpression:
                                                           v := $2.(variable) // On impose l'utilisation d'une variable dans ce cas
                                                           $$ = privatize{string(v), $4}
                                                       }
-                                                    }
+                                                   }
+  | VAR LPAREN value RPAREN                        { $$ = send{$1, $3}        }
 
 afterparenthesis:
-    innerexpression
+    innerexpression   /* définition d'un canal privé */
   |                                               { $$ = nil                   }
 
+value:
+    INT                                           { $$ = constant($1)          }
+  | VAR                                           { $$ = variable($1)          }
+  | value COMMA value                             { $$ = pair{$1, $3}          }
 
 
 %%
