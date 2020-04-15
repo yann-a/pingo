@@ -28,7 +28,10 @@ type sequence struct {
   then expr
 }
 
-type print expr
+type print struct {
+  v value
+  then expr
+}
 
 
 
