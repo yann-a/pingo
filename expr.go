@@ -13,7 +13,7 @@ type receiveThen struct { // receive a value then execute a process
   received string
   then expr
 }
-type lambda struct { // used to define anonymous channels
+type privatize struct { // used to define private channels
   channel string
   then expr
 }

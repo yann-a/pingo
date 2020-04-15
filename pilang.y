@@ -18,13 +18,15 @@ import (
   s string
 }
 
-%type <ret> expr innerexpression
+%type <ret> expr innerexpression afterparenthesis
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
 
 %left COLON
 %left PIPE
+
+%nonassoc RPAREN
 
 %%
 
@@ -43,9 +45,21 @@ expr:
 
 innerexpression:
     INT                                            { $$ = constant($1)         }
-  | VAR                                            { $$ = variable($1)         }
-  | LPAREN expr RPAREN                             { $$ = $2                   }
-  /* | innerexpression COLON innerexpression          { $$ = sequence{$1, $3}     } */
+  | VAR %prec RPAREN                               { $$ = variable($1)         }
+  | LPAREN expr RPAREN afterparenthesis            {
+                                                      switch $4 {
+                                                        case nil:
+                                                          $$ = $2
+                                                        default:
+                                                          v := $2.(variable)
+                                                          $$ = privatize{string(v), $4}
+                                                      }
+                                                    }
+
+afterparenthesis:
+    innerexpression
+  |                                               { $$ = nil                   }
+
 
 
 %%
