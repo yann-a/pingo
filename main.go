@@ -28,6 +28,7 @@ func main() {
 		exprParse(lex)
 
 		ret := lex.ret
+		eval(ret, env{})
 		fmt.Println(ret)
 	}
 }

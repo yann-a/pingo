@@ -2,9 +2,8 @@ package main
 
 // Expressions
 type expr interface{
-  isExpr()
+	isExpr()
 }
-
 
 
 type parallel []expr
