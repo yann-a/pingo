@@ -36,7 +36,7 @@ func (e choose)        String() string      {
   return fmt.Sprintf("(%v + %v)", e.e, e.f)
 }
 
-func (e conditional)  String() string      {
+func (e conditional)   String() string      {
   var condS string
   if e.eq {
     condS = "="
@@ -44,5 +44,9 @@ func (e conditional)  String() string      {
     condS = "!="
   }
 
-  return fmt.Sprintf("[%v %s %v]%v", e.e, condS, e.f, e.then)
+  return fmt.Sprintf("([%v %s %v]%v)", e.e, condS, e.f, e.then)
+}
+
+func (e repl)          String() string      {
+  return fmt.Sprintf("(!%v(%v).%v)", e.channel, e.pattern, e.then)
 }

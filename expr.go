@@ -59,6 +59,13 @@ type conditional struct {
 }
 func (e conditional) isExpr() { }
 
+type repl struct { // Replication of an input
+  channel string
+  pattern terminal
+  then expr
+}
+func (e repl) isExpr() { }
+
 
 
 // Values

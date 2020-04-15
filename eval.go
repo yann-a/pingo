@@ -67,6 +67,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 		case skip:
 			// nothing to do here
 
+
 		case choose:
 			var c1, c2 string
 			var p, p1, p2 terminal
@@ -115,6 +116,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 			wg.Add(1)
 			eval(t, envir, wg)
 
+
 		case conditional:
 			val_l, ok_l := interpretTerminal(v.e, envir)
 			val_r, ok_r := interpretTerminal(v.f, envir)
@@ -127,7 +129,12 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 				wg.Add(1)
 				eval(v.then, envir, wg)
 			}
-			
+
+
+		case repl:
+			fmt.Printf("TODO: implement replication : %v", v)
+
+
 		default:
 			fmt.Printf("unrecognised type %T (%v)\n", v, v)
 	}

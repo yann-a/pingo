@@ -27,7 +27,7 @@ import (
 %token <num> INT
 %token <s> VAR
 %token OUTPUT PRINT
-%token CHOOSE EQUAL NOTEQUAL BRA KET
+%token CHOOSE EQUAL NOTEQUAL BRA KET REPL
 
 %left CHOOSE
 %left COMMA
@@ -61,6 +61,7 @@ innerexpression:
     INT                                            { $$ = skip($1)                         }
   | LPAREN expr RPAREN                             { $$ = $2                               }
   | LPAREN VAR RPAREN innerexpression              { $$ = privatize{$2, $4}                }
+  | REPL VAR pattern DOT innerexpression           { $$ = repl{$2, $3, $5}                 }
   | VAR pattern DOT innerexpression                { $$ = receiveThen{$1, $2, $4}          }
   | OUTPUT VAR value                               { $$ = send{$2, $3}                     }
   | PRINT value                                    { $$ = print{$2, skip(0)}               }
@@ -131,6 +132,8 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
         return BRA
       case ']':
         return KET
+      case '!':
+        return REPL
       case ' ', '\t', '\n', '\r':
       default:
         if unicode.IsLetter(c) {
