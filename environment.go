@@ -9,6 +9,9 @@ type value interface {
 
 type channel chan value
 func (c channel) isValue() { }
+func createChannel() channel {
+  return make(channel, 100) // channels are buffered
+}
 
 // type constant is defined in eval.go and is also a terminal
 func (c constant) isValue() { }
@@ -37,7 +40,7 @@ var accessToEnd sync.Mutex // The end of the environment cannot be updated by tw
 
 func (e *env) get_value(x variable) value {
   if (e == nil) {
-    channel := make(channel)
+    channel := createChannel()
     e = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
     return channel
@@ -52,7 +55,7 @@ func (e *env) get_value(x variable) value {
     defer accessToEnd.Unlock() // And make sure it's unlocked once we're done
 
     if e.next == nil { // If no concurrent access before getting the lock
-      channel := make(channel)
+      channel := createChannel()
       e.next = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
       return channel
