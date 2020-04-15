@@ -5,11 +5,11 @@ type value interface {
   isValue()
 }
 
-type vchannel chan value
-func (c vchannel) isValue() { }
+type channel chan value
+func (c channel) isValue() { }
 
-type vinteger int
-func (c vinteger) isValue() { }
+// type constant is defined in eval.go and is also a terminal
+func (c constant) isValue() { }
 
 type vpair struct {
   v1 value
@@ -31,7 +31,7 @@ func (e *env) set_value(x variable, v value) env {
 
 func (e *env) get_value(x variable) value {
   if (e == nil) {
-    channel := make(vchannel)
+    channel := make(channel)
     e = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
     return channel
@@ -42,7 +42,7 @@ func (e *env) get_value(x variable) value {
   }
 
   if e.next == nil { // on a atteint la fin de l'environnement
-    channel := make(vchannel)
+    channel := make(channel)
     e.next = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
     return channel
