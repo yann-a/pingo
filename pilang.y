@@ -65,6 +65,7 @@ innerexpression:
   | OUTPUT VAR value                               { $$ = send{$2, $3}                     }
   | PRINT value                                    { $$ = print{$2, skip(0)}               }
   | PRINT value COLON innerexpression              { $$ = print{$2, $4}                    }
+  | BRA expr EQUAL expr KET innerexpression        { $$ = conditional{$2, $4, $6}         }
 
 pattern: /* for reception */
     VAR                                            { $$ = variable($1)                     }
