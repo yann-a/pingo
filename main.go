@@ -9,11 +9,6 @@ import (
 	"os"
 )
 
-func eval(e expr) value{
-	var v constant
-	return v
-}
-
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	for {
