@@ -127,6 +127,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 				wg.Add(1)
 				eval(v.then, envir, wg)
 			}
+			
 		default:
 			fmt.Printf("unrecognised type %T (%v)\n", v, v)
 	}
