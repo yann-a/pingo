@@ -24,11 +24,15 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 				return
 			}
 
+			wg.Done()
 			channel <- val
+			wg.Add(1)
 
 
 		case receiveThen:
+			wg.Done() // on réduit de 1 le compte des eval en cours d'exécution tant qu'on attend un message
 			message := <- envir.get_value(variable(v.channel)).(channel)
+			wg.Add(1) // On réaugmente quand on finit l'écoute
 
 			switch pattern := v.pattern.(type) {
 			case variable:
