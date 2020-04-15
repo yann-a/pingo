@@ -17,22 +17,17 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 
 		case send:
-			channel := envir.get_value(variable(v.channel)).(channel)
 			val, ok := interpretTerminal(v.value, envir)
 			if !ok {
 				fmt.Println("Error while sending: not a value provided\n")
 				return
 			}
 
-			wg.Done()
-			channel <- val
-			wg.Add(1)
+			envir.get_value(variable(v.channel)).(channel) <- val
 
 
 		case receiveThen:
-			wg.Done() // on réduit de 1 le compte des eval en cours d'exécution tant qu'on attend un message
 			message := <- envir.get_value(variable(v.channel)).(channel)
-			wg.Add(1) // On réaugmente quand on finit l'écoute
 
 			switch pattern := v.pattern.(type) {
 			case variable:
@@ -48,7 +43,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 
 		case privatize:
-			envir2 := envir.set_value(variable(v.channel), make(channel))
+			envir2 := envir.set_value(variable(v.channel), createChannel())
 
 			wg.Add(1)
 			eval(v.then, envir2, wg)
