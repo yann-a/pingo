@@ -33,8 +33,9 @@ func (e *env) set_value(x variable, v value) *env {
 }
 
 func (e *env) get_value(x variable) value {
-  e.mux.Lock()
-  defer e.mux.Unlock()
+  e.mux.Lock() // To avoid interferences between processes, we lock the mutex
+  defer e.mux.Unlock() // And make sure it's unlocked once we're done
+
   if (e == nil) {
     channel := make(channel)
     e = &env{x, channel, nil, sync.Mutex{}} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
