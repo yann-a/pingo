@@ -4,41 +4,38 @@ package main
 type expr interface{
 	isExpr()
 }
-func (c parallel) isExpr() {}
-func (c send) isExpr() {}
-func (c receiveThen) isExpr() {}
-func (c privatize) isExpr() {}
-func (c sequence) isExpr() {}
-func (c print) isExpr() {}
 
 
 type parallel []expr
+func (c parallel) isExpr() { }
 
 type send struct { // send a value on a given channel
   channel string
-  value expr
+  value terminal
 }
+func (c send) isExpr() { }
 
 type receiveThen struct { // receive a value then execute a process
   channel string
   received terminal
   then expr
 }
+func (c receiveThen) isExpr() { }
 
 type privatize struct { // used to define private channels
   channel string
   then expr
 }
-
-type sequence struct {
-  first expr
-  then expr
-}
+func (c privatize) isExpr() { }
 
 type print struct {
   v terminal
   then expr
 }
+func (c print) isExpr() { }
+
+type skip int
+func (c skip) isExpr() { }
 
 
 
