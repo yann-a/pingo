@@ -33,7 +33,7 @@ func (e *env) set_value(x variable, v value) *env {
 
 
 var accessToEnd sync.Mutex // The end of the environment cannot be updated by two goroutines at the same time
-                           // We prevent that from happening using a mutex
+                           // We prevent that from happening by using a mutex
 
 func (e *env) get_value(x variable) value {
   if (e == nil) {
@@ -57,9 +57,9 @@ func (e *env) get_value(x variable) value {
 
       return channel
     }
-
-    // Otherwise we dive deeper in the
   }
 
+
+  // Otherwise we dive deeper in the environment
   return e.next.get_value(x)
 }
