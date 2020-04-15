@@ -34,6 +34,8 @@ import (
 
 %nonassoc RPAREN
 
+
+/*********** Parser ***********/
 %%
 
 top: expr                                          { exprlex.(*exprLex).ret = $1           }
@@ -75,6 +77,7 @@ literal:
 
 
 
+/**********     Lexer     ***********/
 %%
 
 // The parser expects the lexer to return 0 on EOF.  Give it a name
@@ -94,34 +97,33 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
   for {
     c := x.next()
     switch c {
-    case eof:
-      return eof
-    case '(':
-      return LPAREN
-    case ')':
-      return RPAREN
-    case '.':
-      return DOT
-    case '|':
-      return PIPE
-    case ',':
-      return COMMA
-    case ';':
-      return COLON
-    case '^':
-      return OUTPUT
-    case ' ', '\t', '\n', '\r':
-    default:
-      if unicode.IsLetter(c) {
-        return x.string(c, yylval)
-      } else if unicode.IsNumber(c) {
-        return x.num(c, yylval)
+      case eof:
+        return eof
+      case '(':
+        return LPAREN
+      case ')':
+        return RPAREN
+      case '.':
+        return DOT
+      case '|':
+        return PIPE
+      case ',':
+        return COMMA
+      case ';':
+        return COLON
+      case '^':
+        return OUTPUT
+      case ' ', '\t', '\n', '\r':
+      default:
+        if unicode.IsLetter(c) {
+          return x.string(c, yylval)
+        } else if unicode.IsNumber(c) {
+          return x.num(c, yylval)
+        }
+
+        x.reader.UnreadRune()
+        log.Printf("unrecognized character %q", c)
       }
-
-      x.reader.UnreadRune()
-
-      log.Printf("unrecognized character %q", c)
-    }
   }
 }
 
@@ -132,19 +134,21 @@ func (x *exprLex) num(c rune, yylval *exprSymType) int {
       log.Fatalf("WriteRune: %s", err)
     }
   }
+
   var b bytes.Buffer
   add(&b, c)
+
   L: for {
     c = x.next()
     switch {
-    case unicode.IsNumber(c):
-      add(&b, c)
-    default:
-      if c != eof {
-        x.reader.UnreadRune()
-      }
+      case unicode.IsNumber(c):
+        add(&b, c)
+      default:
+        if c != eof {
+          x.reader.UnreadRune()
+        }
 
-      break L
+        break L
     }
   }
 
@@ -166,19 +170,21 @@ func (x *exprLex) string(c rune, yylval *exprSymType) int {
       log.Fatalf("WriteRune: %s", err)
     }
   }
+
   var b bytes.Buffer
   add(&b, c)
+
   L: for {
     c = x.next()
     switch {
-    case unicode.IsLetter(c):
-      add(&b, c)
-    default:
-      if c != eof {
-        x.reader.UnreadRune()
-      }
+      case unicode.IsLetter(c):
+        add(&b, c)
+      default:
+        if c != eof {
+          x.reader.UnreadRune()
+        }
 
-      break L
+        break L
     }
   }
 
@@ -194,10 +200,12 @@ func (x *exprLex) string(c rune, yylval *exprSymType) int {
 // Return the next rune for the lexer.
 func (x *exprLex) next() rune {
   c, size, err := x.reader.ReadRune()
+
   if c == utf8.RuneError && size == 1 {
     log.Print("invalid utf8")
     return x.next()
   }
+
   if err != nil {
     return eof
   }
