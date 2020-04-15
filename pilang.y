@@ -14,7 +14,7 @@ import (
 
 %union {
   ret expr
-  v value
+  v terminal
   num int
   s string
 }

@@ -14,7 +14,7 @@ type send struct { // send a value on a given channel
 
 type receiveThen struct { // receive a value then execute a process
   channel string
-  received value
+  received terminal
   then expr
 }
 
@@ -29,7 +29,7 @@ type sequence struct {
 }
 
 type print struct {
-  v value
+  v terminal
   then expr
 }
 
@@ -37,19 +37,19 @@ type print struct {
 
 
 // Values
-type value interface {
-  isValue()
+type terminal interface {
+  isTerminal()
 }
 
 
 type constant int
-func (c constant) isValue() {}
+func (c constant) isTerminal() {}
 
 type variable string
-func (c variable) isValue() {}
+func (c variable) isTerminal() {}
 
 type pair struct {
-  v1 value
-  v2 value
+  v1 terminal
+  v2 terminal
 }
-func (c pair) isValue() {}
+func (c pair) isTerminal() {}

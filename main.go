@@ -9,9 +9,7 @@ import (
 	"os"
 )
 
-func eval(e expr) value{
-	var v constant
-	return v
+func eval(e expr) {
 }
 
 func main() {
