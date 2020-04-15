@@ -9,10 +9,6 @@ import (
   "sync"
 )
 
-func waitWorker(wg *sync.WaitGroup) {
-
-}
-
 func main() {
 	in := bufio.NewReader(os.Stdin)
 
@@ -29,6 +25,5 @@ func main() {
 	wg.Add(1)
 	go eval(ret, &env{}, &wg)
 
-	go waitWorker(&wg) // We wait for all goroutines to terminate
-										 // it is in a different goroutine in order to prevent "all goroutines are asleep" errors when there is only one parallel process
+	wg.Wait() // We wait for all goroutines to terminate
 }
