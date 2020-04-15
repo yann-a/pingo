@@ -20,7 +20,8 @@ import (
   s string
 }
 
-%type <ret> expr innerexpression afterparenthesis
+
+%type <ret> top expr innerexpression afterparenthesis
 %type <v> pattern value literal
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
@@ -35,7 +36,7 @@ import (
 
 %%
 
-top: expr                                          { fmt.Println($1)           }
+top: expr                                          { $1           }
 
 expr:
     innerexpression
