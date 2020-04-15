@@ -53,7 +53,7 @@ innerexpression:
     INT                                            { $$ = skip($1)                         }
   | LPAREN expr RPAREN                             { $$ = $2                               }
   | LPAREN VAR RPAREN innerexpression              { $$ = privatize{$2, $4}                }
-  | VAR LPAREN pattern RPAREN DOT innerexpression  { $$ = receiveThen{$1, $3, $6}          }
+  | VAR pattern DOT innerexpression                { $$ = receiveThen{$1, $2, $4}          }
   | OUTPUT VAR value                               { $$ = send{$2, $3}                     }
   | PRINT value                                    { $$ = print{$2, skip(0)}               }
   | PRINT value COLON innerexpression              { $$ = print{$2, $4}                    }
@@ -61,6 +61,7 @@ innerexpression:
 pattern: /* for reception */
     VAR                                            { $$ = variable($1)                     }
   | VAR COMMA VAR                                  { $$ = pair{variable($1), variable($3)} }
+  | LPAREN pattern RPAREN                          { $$ = $2                               }
 
 value: /* for sending */
     literal

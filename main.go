@@ -16,6 +16,9 @@ func main() {
 	exprParse(lex)
 
 	ret := lex.ret
+	if ret == nil {
+		return
+	}
 
 	fmt.Println(ret)
 
