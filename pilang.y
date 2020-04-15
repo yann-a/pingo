@@ -46,12 +46,12 @@ expr:
 innerexpression:
     INT                                            { $$ = constant($1)         }
   | VAR %prec RPAREN                               { $$ = variable($1)         }
-  | LPAREN expr RPAREN afterparenthesis            {
+  | LPAREN expr RPAREN afterparenthesis            { // Syntaxe unifiée pour contourner les conflits...
                                                       switch $4 {
                                                         case nil:
                                                           $$ = $2
                                                         default:
-                                                          v := $2.(variable)
+                                                          v := $2.(variable) // On impose l'utilisation d'une variable dans ce cas
                                                           $$ = privatize{string(v), $4}
                                                       }
                                                     }
