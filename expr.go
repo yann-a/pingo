@@ -1,8 +1,15 @@
 package main
 
 // Expressions
-type expr interface{}
-
+type expr interface{
+	isExpr()
+}
+func (c parallel) isExpr() {}
+func (c send) isExpr() {}
+func (c receiveThen) isExpr() {}
+func (c privatize) isExpr() {}
+func (c sequence) isExpr() {}
+func (c print) isExpr() {}
 
 
 type parallel []expr

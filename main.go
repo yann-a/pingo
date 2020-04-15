@@ -23,6 +23,6 @@ func main() {
 			log.Fatalf("ReadBytes: %s", err)
 		}
 
-		eval(exprParse(&exprLex{line: line}))
+		eval(exprParse(&exprLex{line: line}), env{})
 	}
 }
