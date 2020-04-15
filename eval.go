@@ -1,12 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
-func eval(e expr, envir *env){
+func eval(e expr, envir *env, wg *sync.WaitGroup){
+	defer wg.Done()
+
 	switch v := e.(type) {
 		case parallel:
 			for _, task := range(v) {
-				go eval(task, envir)
+				wg.Add(1)
+				go eval(task, envir, wg)
 			}
 
 
@@ -33,13 +39,15 @@ func eval(e expr, envir *env){
 				envir = envir.set_value(pattern.v2.(variable), pair.v2)
 			}
 
-			eval(v.then, envir)
+			wg.Add(1)
+			eval(v.then, envir, wg)
 
 
 		case privatize:
 			envir2 := envir.set_value(variable(v.channel), make(channel))
 
-			eval(v.then, envir2)
+			wg.Add(1)
+			eval(v.then, envir2, wg)
 
 
 		case print:
@@ -53,7 +61,8 @@ func eval(e expr, envir *env){
 
 			fmt.Printf("%d\n", int(integer))
 
-			eval(v.then, envir)
+			wg.Add(1)
+			eval(v.then, envir, wg)
 
 
 		case skip:

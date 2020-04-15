@@ -6,7 +6,9 @@ import (
 	"bufio"
 	"os"
 	"fmt"
+  "sync"
 )
+
 
 func main() {
 	in := bufio.NewReader(os.Stdin)
@@ -16,6 +18,13 @@ func main() {
 
 	ret := lex.ret
 
-	eval(ret, &env{})
 	fmt.Println(ret)
+
+	// We want all goroutines to have finished before killing the process
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	eval(ret, &env{}, &wg)
+	wg.Wait() // We wait for all goroutines to terminate
+
 }
