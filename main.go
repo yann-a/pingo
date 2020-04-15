@@ -6,7 +6,7 @@ import (
 	"bufio"
 	"os"
 	"fmt"
-  "sync"
+	"sync"
 )
 
 func main() {
