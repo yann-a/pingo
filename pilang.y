@@ -6,6 +6,7 @@ import (
   "bytes"
   "fmt"
   "log"
+  "unicode"
   "unicode/utf8"
   "strconv"
 )
@@ -95,12 +96,14 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
       return COMMA
     case ';':
       return COLON
-    case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-      return x.num(c, yylval)
-    case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
-      return x.string(c, yylval)
     case ' ', '\t', '\n', '\r':
     default:
+      if unicode.IsLetter(c) {
+        return x.string(c, yylval)
+      } else if unicode.IsNumber(c) {
+        return x.num(c, yylval)
+      }
+
       log.Printf("unrecognized character %q", c)
     }
   }
@@ -117,8 +120,8 @@ func (x *exprLex) num(c rune, yylval *exprSymType) int {
   add(&b, c)
   L: for {
     c = x.next()
-    switch c {
-    case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E':
+    switch {
+    case unicode.IsNumber(c):
       add(&b, c)
     default:
       break L
@@ -150,8 +153,8 @@ func (x *exprLex) string(c rune, yylval *exprSymType) int {
   add(&b, c)
   L: for {
     c = x.next()
-    switch c {
-    case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
+    switch {
+    case unicode.IsLetter(c):
       add(&b, c)
     default:
       break L
