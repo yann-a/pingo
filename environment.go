@@ -25,20 +25,20 @@ type env struct {
   name variable
   value value
   next *env
-  mux sync.Mutex
 }
 
 func (e *env) set_value(x variable, v value) *env {
-  return &env{x, v, e, sync.Mutex{}}
+  return &env{x, v, e}
 }
 
-func (e *env) get_value(x variable) value {
-  e.mux.Lock() // To avoid interferences between processes, we lock the mutex
-  defer e.mux.Unlock() // And make sure it's unlocked once we're done
 
+var accessToEnd sync.Mutex // The end of the environment cannot be updated by two goroutines at the same time
+                           // We prevent that from happening using a mutex
+
+func (e *env) get_value(x variable) value {
   if (e == nil) {
     channel := make(channel)
-    e = &env{x, channel, nil, sync.Mutex{}} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
+    e = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
     return channel
   }
@@ -48,10 +48,17 @@ func (e *env) get_value(x variable) value {
   }
 
   if e.next == nil { // on a atteint la fin de l'environnement
-    channel := make(channel)
-    e.next = &env{x, channel, nil, sync.Mutex{}} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
+    accessToEnd.Lock() // To avoid interferences between processes, we lock the mutex
+    defer accessToEnd.Unlock() // And make sure it's unlocked once we're done
 
-    return channel
+    if e.next == nil { // If no concurrent access before getting the lock
+      channel := make(channel)
+      e.next = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
+
+      return channel
+    }
+
+    // Otherwise we dive deeper in the
   }
 
   return e.next.get_value(x)
