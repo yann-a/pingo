@@ -26,7 +26,7 @@ import (
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
-%token OUTPUT
+%token OUTPUT PRINT
 
 %left COMMA
 %left COLON
@@ -36,7 +36,7 @@ import (
 
 %%
 
-top: expr                                          { $1           }
+top: expr                                          { fmt.Println($1); $$ = $1              }
 
 expr:
     innerexpression
@@ -50,8 +50,8 @@ expr:
                                                    }
 
 innerexpression:
-    INT                                            { $$ = constant($1)         }
-  | VAR %prec RPAREN                               { $$ = variable($1)         }
+    INT                                            { $$ = constant($1)                     }
+  | VAR %prec RPAREN                               { $$ = variable($1)                     }
   | LPAREN expr RPAREN afterparenthesis            { // Syntaxe unifiée pour contourner les conflits...
                                                       switch $4 {
                                                         case nil:
@@ -61,15 +61,17 @@ innerexpression:
                                                           $$ = privatize{string(v), $4}
                                                       }
                                                    }
-  | VAR LPAREN pattern RPAREN DOT innerexpression  { $$ = receiveThen{$1, $3, $6} }
-  | OUTPUT VAR value                               { $$ = send{$2, $3}         }
+  | VAR LPAREN pattern RPAREN DOT innerexpression  { $$ = receiveThen{$1, $3, $6}          }
+  | OUTPUT VAR value                               { $$ = send{$2, $3}                     }
+  | PRINT value                                    { $$ = print{$2, constant(0)}           }
+  | PRINT value COLON innerexpression              { $$ = print{$2, $4}                    }
 
 afterparenthesis:
     innerexpression   /* définition d'un canal privé */
-  |                                                { $$ = nil                  }
+  |                                                { $$ = nil                              }
 
 pattern: /* for reception */
-    VAR                                            { $$ = variable($1)         }
+    VAR                                            { $$ = variable($1)                     }
   | VAR COMMA VAR                                  { $$ = pair{variable($1), variable($3)} }
 
 value: /* for sending */
@@ -187,6 +189,10 @@ func (x *exprLex) string(c rune, yylval *exprSymType) int {
   }
 
   yylval.s = b.String()
+
+  if yylval.s == "print" {
+    return PRINT
+  }
 
   return VAR
 }
