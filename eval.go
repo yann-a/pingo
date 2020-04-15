@@ -8,6 +8,8 @@ func eval(e expr, envir *env){
 			for _, task := range(v) {
 				go eval(task, envir)
 			}
+
+
 		case send:
 			channel := envir.get_value(variable(v.channel)).(channel)
 			val, ok := interpretTerminal(v.value, envir)
@@ -17,6 +19,8 @@ func eval(e expr, envir *env){
 			}
 
 			channel <- val
+
+
 		case receiveThen:
 			message := <- envir.get_value(variable(v.channel)).(channel)
 
@@ -30,10 +34,14 @@ func eval(e expr, envir *env){
 			}
 
 			eval(v.then, envir)
+
+
 		case privatize:
 			envir2 := envir.set_value(variable(v.channel), make(channel))
 
 			eval(v.then, envir2)
+
+
 		case print:
 			ret, ok := interpretTerminal(v.v, envir)
 			if !ok {
@@ -46,12 +54,19 @@ func eval(e expr, envir *env){
 			fmt.Printf("%d\n", int(integer))
 
 			eval(v.then, envir)
-		case skip: // nothing to do here
+
+
+		case skip:
+			// nothing to do here
+
+
 		default:
 			fmt.Printf("unrecognised type %T\n", v)
 	}
 }
 
+
+// Transform a terminal expression into a value
 func interpretTerminal(val terminal, envir *env) (value, bool) {
 	switch v := val.(type) {
 		case constant:
