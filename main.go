@@ -26,10 +26,8 @@ func main() {
 
 	if *outputCode {
 		fmt.Println(ret)
-	} else {
-		fmt.Println("no output")
 	}
-
+	
 	// We want all goroutines to have finished before killing the process
 	var wg sync.WaitGroup
 
