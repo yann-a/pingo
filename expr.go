@@ -52,8 +52,9 @@ type choose struct {
 func (e choose) isExpr() { }
 
 type conditional struct {
-  e expr
-  f expr
+  e terminal
+  eq bool
+  f terminal
   then expr
 }
 func (e conditional) isExpr() { }

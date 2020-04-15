@@ -114,6 +114,19 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 			wg.Add(1)
 			eval(t, envir, wg)
+
+		case conditional:
+			val_l, ok_l := interpretTerminal(v.e, envir)
+			val_r, ok_r := interpretTerminal(v.f, envir)
+			if !ok_l || !ok_r {
+				fmt.Printf("Error : can't compare non-values expressions (%v and %v)\n", v.e, v.f)
+				return
+			}
+
+			if (v.eq && val_l == val_r) || (!v.eq && val_l != val_r) {
+				wg.Add(1)
+				eval(v.then, envir, wg)
+			}
 		default:
 			fmt.Printf("unrecognised type %T (%v)\n", v, v)
 	}

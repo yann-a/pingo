@@ -37,5 +37,12 @@ func (e choose)        String() string      {
 }
 
 func (e conditional)  String() string      {
-  return fmt.Sprintf("[%v = %v].%v", e.e, e.f, e.then)
+  var condS string
+  if e.eq {
+    condS = "="
+  } else {
+    condS = "!="
+  }
+
+  return fmt.Sprintf("[%v %s %v]%v", e.e, condS, e.f, e.then)
 }
