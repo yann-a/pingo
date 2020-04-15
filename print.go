@@ -31,3 +31,7 @@ func (e print)       String() string      {
 func (e skip)        String() string      {
   return "skip"
 }
+
+func (e choose)      String() string      {
+  return fmt.Sprintf("(%v + %v)", e.e, e.f)
+}

@@ -45,6 +45,13 @@ type skip int
 func (e skip) isExpr() { }
 
 
+type choose struct {
+  e expr
+  f expr
+}
+func (e choose) isExpr() { }
+
+
 
 // Values
 type terminal interface {
