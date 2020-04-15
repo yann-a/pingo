@@ -1,5 +1,7 @@
 package main
 
+import "sync"
+
 // Concrete values
 type value interface {
   isValue()
@@ -23,16 +25,19 @@ type env struct {
   name variable
   value value
   next *env
+  mux sync.Mutex
 }
 
 func (e *env) set_value(x variable, v value) *env {
-  return &env{x, v, e}
+  return &env{x, v, e, sync.Mutex{}}
 }
 
 func (e *env) get_value(x variable) value {
+  e.mux.Lock()
+  defer e.mux.Unlock()
   if (e == nil) {
     channel := make(channel)
-    e = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
+    e = &env{x, channel, nil, sync.Mutex{}} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
     return channel
   }
@@ -43,7 +48,7 @@ func (e *env) get_value(x variable) value {
 
   if e.next == nil { // on a atteint la fin de l'environnement
     channel := make(channel)
-    e.next = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
+    e.next = &env{x, channel, nil, sync.Mutex{}} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
     return channel
   }

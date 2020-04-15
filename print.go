@@ -28,4 +28,6 @@ func (e print)       String() string      {
   return fmt.Sprintf("(print %v; %v)", e.v, e.then)
 }
 
-func (e skip) String() string { return "skip"}
+func (e skip)        String() string      {
+  return "skip"
+}
