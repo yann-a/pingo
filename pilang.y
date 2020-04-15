@@ -21,7 +21,7 @@ import (
 }
 
 %type <ret> expr innerexpression afterparenthesis
-%type <v> pattern
+%type <v> pattern value literal
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
@@ -67,9 +67,19 @@ afterparenthesis:
     innerexpression   /* définition d'un canal privé */
   |                                                { $$ = nil                  }
 
-pattern:
+pattern: /* for reception */
     VAR                                            { $$ = variable($1)         }
   | VAR COMMA VAR                                  { $$ = pair{variable($1), variable($3)} }
+
+value: /* for sending */
+    literal
+  | literal COMMA literal                          { $$ = pair{$1, $3}          }
+
+literal:
+    INT                                            { $$ = constant($1)          }
+  | VAR                                            { $$ = variable($1)          }
+
+
 
 
 %%
