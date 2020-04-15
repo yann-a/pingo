@@ -9,24 +9,33 @@ func eval(e expr, envir *env){
 				go eval(task, envir)
 			}
 		case send:
-			fmt.Printf("TODO : implement type %T (%v)\n", v, v)
+			channel := envir.get_value(variable(v.channel)).(channel)
+			val, ok := interpretTerminal(v.value, envir)
+			if !ok {
+				fmt.Println("Error while sending: not a value provided")
+				return
+			}
+
+			channel <- val
 		case receiveThen:
 			fmt.Printf("TODO : implement type %T (%v)\n", v, v)
 		case privatize:
-			fmt.Printf("TODO : implement type %T (%v)\n", v, v)
+			envir2 := envir.set_value(variable(v.channel), make(channel))
+
+			eval(v.then, envir2)
 		case print:
 			ret, ok := interpretTerminal(v.v, envir)
-			integer, ok2 := ret.(constant)
-			if !ok || !ok2 {
-				fmt.Println("Error: a pair or a channel was provided to print.")
+			if !ok {
+				fmt.Println("Error while printing: not a value provided")
 				return
 			}
+
+			integer := ret.(constant)
 
 			fmt.Printf("%d\n", int(integer))
 
 			eval(v.then, envir)
-		case skip:
-			break // nothing to do here
+		case skip: // nothing to do here
 		default:
 			fmt.Printf("unrecognised type %T\n", v)
 	}

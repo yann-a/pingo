@@ -25,8 +25,8 @@ type env struct {
   next *env
 }
 
-func (e *env) set_value(x variable, v value) env {
-  return env{x, v, e}
+func (e *env) set_value(x variable, v value) *env {
+  return &env{x, v, e}
 }
 
 func (e *env) get_value(x variable) value {
