@@ -18,7 +18,18 @@ func eval(e expr, envir *env){
 
 			channel <- val
 		case receiveThen:
-			fmt.Printf("TODO : implement type %T (%v)\n", v, v)
+			message := <- envir.get_value(variable(v.channel)).(channel)
+
+			switch pattern := v.pattern.(type) {
+			case variable:
+				envir = envir.set_value(pattern, message)
+			case pair:
+				pair := message.(vpair)
+				envir = envir.set_value(pattern.v1.(variable), pair.v1)
+				envir = envir.set_value(pattern.v2.(variable), pair.v2)
+			}
+
+			eval(v.then, envir)
 		case privatize:
 			envir2 := envir.set_value(variable(v.channel), make(channel))
 

@@ -17,7 +17,7 @@ func (c send) isExpr() { }
 
 type receiveThen struct { // receive a value then execute a process
   channel string
-  received terminal
+  pattern terminal
   then expr
 }
 func (c receiveThen) isExpr() { }
