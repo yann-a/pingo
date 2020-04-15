@@ -5,6 +5,7 @@ package main
 import (
   "bytes"
   "log"
+  "fmt"
   "unicode" // différencie les lettres des nombres
   "unicode/utf8"
   "strconv"
