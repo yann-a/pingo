@@ -27,7 +27,7 @@ import (
 %token <num> INT
 %token <s> VAR
 %token OUTPUT PRINT
-%token CHOOSE EQUAL NOTEQUAL BRA KET REPL
+%token CHOOSE EQUAL BRA KET REPL
 
 %left CHOOSE
 %left COMMA
@@ -67,7 +67,7 @@ innerexpression:
   | PRINT value                                    { $$ = print{$2, skip(0)}               }
   | PRINT value COLON innerexpression              { $$ = print{$2, $4}                    }
   | BRA value EQUAL value KET innerexpression      { $$ = conditional{$2, true, $4, $6}    }
-  | BRA value NOTEQUAL value KET innerexpression   { $$ = conditional{$2, false, $4, $6}   }
+  | BRA value REPL EQUAL value KET innerexpression { $$ = conditional{$2, false, $5, $7}   }
 
 pattern: /* for reception */
     VAR                                            { $$ = variable($1)                     }
@@ -126,8 +126,6 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
         return CHOOSE
       case '=':
         return EQUAL
-      case '/':
-        return NOTEQUAL
       case '[':
         return BRA
       case ']':
