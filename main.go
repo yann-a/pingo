@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"fmt"
 )
 
 func main() {
@@ -23,6 +24,10 @@ func main() {
 			log.Fatalf("ReadBytes: %s", err)
 		}
 
-		eval(exprParse(&exprLex{line: line}))
+		lex := &exprLex{line: line}
+		exprParse(lex)
+
+		ret := lex.ret
+		fmt.Println(ret)
 	}
 }

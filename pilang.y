@@ -5,7 +5,6 @@ package main
 import (
   "bytes"
   "log"
-  "fmt"
   "unicode" // différencie les lettres des nombres
   "unicode/utf8"
   "strconv"
@@ -21,7 +20,7 @@ import (
 }
 
 
-%type <ret> top expr innerexpression
+%type <ret> expr innerexpression
 %type <v> pattern value literal
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
@@ -36,7 +35,7 @@ import (
 
 %%
 
-top: expr                                          { fmt.Println($1); $$ = $1              }
+top: expr                                          { exprlex.(*exprLex).ret = $1           }
 
 expr:
     innerexpression
@@ -82,6 +81,7 @@ const eof = 0
 // The parser uses the type <prefix>Lex as a lexer. It must provide
 // the methods Lex(*<prefix>SymType) int and Error(string).
 type exprLex struct {
+  ret expr
   line []byte
   peek rune
 }
