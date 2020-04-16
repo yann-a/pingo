@@ -17,17 +17,23 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 
 		case send:
-			val, ok := interpretTerminal(v.value, envir)
+			val, ok := interpretTerminal(v.value, envir, wg)
 			if !ok {
 				fmt.Println("Error while sending: not a value provided")
 				return
 			}
 
-			envir.get_value(variable(v.channel)).(channel) <- val
+			wg.Add(1)
+			channel := envir.get_value(variable(v.channel), wg).(channel)
+			channel.input <- val
 
 
 		case receiveThen:
-			message := <- envir.get_value(variable(v.channel)).(channel)
+			channel := envir.get_value(variable(v.channel), wg).(channel)
+			privateChan := make(chan value) // on ouvre un canal privé pour communiquer avec l'intermédiaire
+
+			channel.request <- privateChan
+			message := <- privateChan // on attend sa réponse sur le canal privé
 
 			switch pattern := v.pattern.(type) {
 			case variable:
@@ -43,14 +49,14 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 
 		case privatize:
-			envir2 := envir.set_value(variable(v.channel), createChannel())
+			envir2 := envir.set_value(variable(v.channel), createChannel(wg))
 
 			wg.Add(1)
 			eval(v.then, envir2, wg)
 
 
 		case print:
-			ret, ok := interpretTerminal(v.v, envir)
+			ret, ok := interpretTerminal(v.v, envir, wg)
 			if !ok {
 				fmt.Println("Error while printing: not a value provided")
 				return
@@ -75,15 +81,15 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 
 // Transform a terminal expression into a value
-func interpretTerminal(val terminal, envir *env) (value, bool) {
+func interpretTerminal(val terminal, envir *env, wg *sync.WaitGroup) (value, bool) {
 	switch v := val.(type) {
 		case constant:
 			return v, true
 		case variable:
-			return envir.get_value(v), true
+			return envir.get_value(v, wg), true
 		case pair:
-			v1, ok1 := interpretTerminal(v.v1, envir)
-			v2, ok2 := interpretTerminal(v.v2, envir)
+			v1, ok1 := interpretTerminal(v.v1, envir, wg)
+			v2, ok2 := interpretTerminal(v.v2, envir, wg)
 
 			return vpair{v1, v2}, ok1 && ok2
 		default:

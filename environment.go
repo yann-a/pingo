@@ -7,11 +7,8 @@ type value interface {
   isValue()
 }
 
-type channel chan value
+// channel defined in channel.go
 func (c channel) isValue() { }
-func createChannel() channel {
-  return make(channel, 100) // channels are buffered
-}
 
 // type constant is defined in eval.go and is also a terminal
 func (c constant) isValue() { }
@@ -38,9 +35,9 @@ func (e *env) set_value(x variable, v value) *env {
 var accessToEnd sync.Mutex // The end of the environment cannot be updated by two goroutines at the same time
                            // We prevent that from happening by using a mutex
 
-func (e *env) get_value(x variable) value {
+func (e *env) get_value(x variable, wg *sync.WaitGroup) value {
   if (e == nil) {
-    channel := createChannel()
+    channel := createChannel(wg)
     e = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
     return channel
@@ -55,7 +52,7 @@ func (e *env) get_value(x variable) value {
     defer accessToEnd.Unlock() // And make sure it's unlocked once we're done
 
     if e.next == nil { // If no concurrent access before getting the lock
-      channel := createChannel()
+      channel := createChannel(wg)
       e.next = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
 
       return channel
@@ -64,5 +61,5 @@ func (e *env) get_value(x variable) value {
 
 
   // Otherwise we dive deeper in the environment
-  return e.next.get_value(x)
+  return e.next.get_value(x, wg)
 }
