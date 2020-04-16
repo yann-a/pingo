@@ -1,0 +1,1 @@
+[1=2]print 5 | ^a 78 | a(x).[x=78]print x | ^b 6 | b(y).[y=7]print y

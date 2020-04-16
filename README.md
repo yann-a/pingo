@@ -25,7 +25,7 @@ sudo apt install golang-golang-x-tools
 + `P | Q` : run P and Q in parallel
 + `^n m` : send m on channel n
 + `n(m).P` : read m on channel n then run P
-+ `(n).P` : create a new (private) channel called n then run P
++ `(n)P` : create a new (private) channel called n then run P
 + `print x` : print the integer x
 + `print x; P` : print the integer x then run P
 + `!n(m).P` : read m on channel n then in parrallel:
