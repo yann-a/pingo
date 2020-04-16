@@ -6,7 +6,7 @@ import (
 	"bufio"
   "bytes"
   "log"
-  "unicode" // différencie les lettres des nombres
+  "unicode" // To tell apart letters from numbers
   "unicode/utf8"
   "strconv"
 )
@@ -46,7 +46,8 @@ expr:
     chooseexpression
   | expr PIPE expr                                 {
                                                       switch v := $1.(type) {
-                                                        case parallel: /* on met tous les process parallèles au même niveau */
+                                                        /* We put all piped processes at the same level */
+                                                        case parallel:
                                                           $$ = parallel(append([]expr(v), $3))
                                                         default:
                                                           $$ = parallel{$1, $3}

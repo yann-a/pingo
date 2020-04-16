@@ -4,16 +4,18 @@ package main
 
 import (
 	"bufio"
-	"os"
-	"fmt"
-	"sync"
 	"flag"
+	"fmt"
+	"os"
+	"sync"
 )
 
 func main() {
+	// The options if the executable
 	outputCode := flag.Bool("showsrc", false, "Output the code before executing it")
 	flag.Parse()
 
+	// Parsing
 	in := bufio.NewReader(os.Stdin)
 
 	lex := &exprLex{reader: in}
@@ -24,14 +26,16 @@ func main() {
 		return
 	}
 
+	// We print the code if asked
 	if *outputCode {
 		fmt.Println(ret)
 	}
-	
+
 	// We want all goroutines to have finished before killing the process
 	var wg sync.WaitGroup
 
 	wg.Add(1)
+	// We launch the evaluation in a goroutine
 	go eval(ret, &env{}, &wg)
 
 	wg.Wait() // We wait for all goroutines to terminate
