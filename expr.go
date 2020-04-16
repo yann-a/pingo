@@ -1,87 +1,97 @@
 package main
 
-
-// Expressions
-type expr interface{
-	isExpr()
-  String() string
+/**** Expressions ****/
+type expr interface {
+	isExpr()        // To indicate a type is an expression
+	String() string // To print the code
 }
 
-
+// An array of expressions piped together
 type parallel []expr
-func (e parallel) isExpr() { }
 
+func (e parallel) isExpr() {}
 
-type send struct { // send a value on a given channel
-  channel string
-  value terminal
+// send a value on a given channel
+type send struct {
+	channel string
+	value   terminal
 }
-func (e send) isExpr() { }
 
+func (e send) isExpr() {}
 
-type receiveThen struct { // receive a value then execute a process
-  channel string
-  pattern terminal
-  then expr
+// receive a value then execute a process
+type receiveThen struct {
+	channel string
+	pattern terminal
+	then    expr
 }
-func (e receiveThen) isExpr() { }
 
+func (e receiveThen) isExpr() {}
 
-type privatize struct { // used to define private channels
-  channel string
-  then expr
+// used to define private channels
+type privatize struct {
+	channel string
+	then    expr
 }
-func (e privatize) isExpr() { }
 
+func (e privatize) isExpr() {}
 
+// the print instruction, which takes another expression to continue (can be skip)
 type print struct {
-  v terminal
-  then expr
+	v    terminal
+	then expr
 }
-func (e print) isExpr() { }
 
+func (e print) isExpr() {}
 
+// the null instruction
 type skip int
-func (e skip) isExpr() { }
 
+func (e skip) isExpr() {}
 
+// non-deterministic select between two "receive and execute"-form expressions
 type choose struct {
-  e receiveThen
-  f receiveThen
+	e receiveThen
+	f receiveThen
 }
-func (e choose) isExpr() { }
 
+func (e choose) isExpr() {}
+
+// a conditional expression
 type conditional struct {
-  e terminal
-  eq bool
-  f terminal
-  then expr
+	e    terminal
+	eq   bool // true tests equality, false inequality
+	f    terminal
+	then expr
 }
-func (e conditional) isExpr() { }
 
-type repl struct { // Replication of an input
-  channel string
-  pattern terminal
-  then expr
+func (e conditional) isExpr() {}
+
+// replication of an input
+type repl struct {
+	channel string
+	pattern terminal
+	then    expr
 }
-func (e repl) isExpr() { }
 
+func (e repl) isExpr() {}
 
-
-// Values
+/**** Values ****/
 type terminal interface {
-  isTerminal()
+	isTerminal()
 }
-
 
 type constant int
+
 func (c constant) isTerminal() {}
 
 type variable string
+
 func (c variable) isTerminal() {}
 
 type pair struct {
-  v1 terminal
-  v2 terminal
+	v1 terminal
+	v2 terminal
 }
+
 func (c pair) isTerminal() {}
