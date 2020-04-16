@@ -18,7 +18,7 @@ sudo apt install golang-golang-x-tools
 
 ## Run
 + compile with `make`
-+ run with `./pingo`
++ run with `./pingo [options] [file]`
 
 ## Syntax
 + `0` : the null instruction
@@ -38,4 +38,4 @@ sudo apt install golang-golang-x-tools
 The available options are :
 + `-showsrc` to show the parsed input before running it
 
-The executable reads from stdin until EOF (or Ctrl+D in command line) is met
+The executable reads from a file if provided, or stdin if none was provided or reading from the file failed, until EOF (or Ctrl+D in command line) is met
