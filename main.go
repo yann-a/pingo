@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	// The options if the executable
+	// The options of the executable
 	outputCode := flag.Bool("showsrc", false, "Output the code before executing it")
 	flag.Parse()
 
