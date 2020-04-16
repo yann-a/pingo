@@ -55,7 +55,7 @@ expr:
 
 chooseexpression:
     innerexpression
-  | chooseexpression CHOOSE chooseexpression       { $$ = choose{$1, $3}                   }
+  | chooseexpression CHOOSE chooseexpression       { $$ = choose{$1.(receiveThen), $3.(receiveThen)} }
 
 innerexpression:
     INT                                            { $$ = skip($1)                         }
