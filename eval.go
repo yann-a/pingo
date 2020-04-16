@@ -30,14 +30,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 		channel := envir.get_value(variable(v.channel)).(channel)
 		message := <-channel
 
-		switch pattern := v.pattern.(type) {
-		case variable:
-			envir = envir.set_value(pattern, message)
-		case pair:
-			pair := message.(vpair)
-			envir = envir.set_value(pattern.v1.(variable), pair.v1)
-			envir = envir.set_value(pattern.v2.(variable), pair.v2)
-		}
+		envir = envir.set_from_pattern(v.pattern, message)
 
 		eval(v.then, envir, wg)
 		wg.Add(1)
@@ -65,53 +58,21 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 	case skip:
 		// nothing to do here
 
-	// case choose:
-	// 	var c1, c2 string
-	// 	var p, p1, p2 terminal
-	// 	var t, t1, t2 expr
-	// 	var message value
-	//
-	// 	switch ve := v.e.(type) {
-	// 		case receiveThen:
-	// 			c1 = ve.channel
-	// 			p1 = ve.pattern
-	// 			t1 = ve.then
-	// 		default:
-	// 			fmt.Println("Processes to choose from can only start by reading : not the case of %v\n", ve)
-	// 			return
-	// 	}
-	// 	switch vf := v.f.(type) {
-	// 		case receiveThen:
-	// 			c2 = vf.channel
-	// 			p2 = vf.pattern
-	// 			t2 = vf.then
-	// 		default:
-	// 			fmt.Println("Processes to choose from can only start by reading : not the case of %v\n", vf)
-	// 			return
-	// 	}
-	//
-	// 	wg.Done() // on réduit de 1 le compte des eval en cours d'exécution tant qu'on attend un message
-	// 	select {
-	// 		case message = <-envir.get_value(variable(c1)).(channel):
-	// 			p = p1
-	// 			t = t1
-	// 		case message = <-envir.get_value(variable(c2)).(channel):
-	// 			p = p2
-	// 			t = t2
-	// 	}
-	// 	wg.Add(1) // On réaugmente quand on finit l'écoute
-	//
-	// 	switch pattern := p.(type) {
-	// 		case variable:
-	// 			envir = envir.set_value(pattern, message)
-	// 		case pair:
-	// 			pair := message.(vpair)
-	// 			envir = envir.set_value(pattern.v1.(variable), pair.v1)
-	// 			envir = envir.set_value(pattern.v2.(variable), pair.v2)
-	// 	}
-	//
-	// 	wg.Add(1)
-	// 	eval(t, envir, wg)
+	case choose:
+		channel1 := envir.get_value(variable(v.e.channel)).(channel)
+		channel2 := envir.get_value(variable(v.f.channel)).(channel)
+
+		select {
+		case val := <-channel1:
+			envir = envir.set_from_pattern(v.e.pattern, val)
+			eval(v.e.then, envir, wg)
+			wg.Add(1)
+
+		case val := <-channel2:
+			envir = envir.set_from_pattern(v.f.pattern, val)
+			eval(v.f.then, envir, wg)
+			wg.Add(1)
+		}
 
 	case conditional:
 		val_l, ok_l := interpretTerminal(v.e, envir)
@@ -130,14 +91,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 		channel := envir.get_value(variable(v.channel)).(channel)
 		message := <-channel
 
-		switch pattern := v.pattern.(type) {
-		case variable:
-			envir = envir.set_value(pattern, message)
-		case pair:
-			pair := message.(vpair)
-			envir = envir.set_value(pattern.v1.(variable), pair.v1)
-			envir = envir.set_value(pattern.v2.(variable), pair.v2)
-		}
+		envir = envir.set_from_pattern(v.pattern, message)
 
 		wg.Add(1)
 		go eval(v.then, envir, wg)
