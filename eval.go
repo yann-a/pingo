@@ -44,15 +44,15 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 				envir = envir.set_value(pattern.v2.(variable), pair.v2)
 			}
 
-			wg.Add(1)
 			eval(v.then, envir, wg)
+			wg.Add(1)
 
 
 		case privatize:
 			envir2 := envir.set_value(variable(v.channel), createChannel(wg))
 
-			wg.Add(1)
 			eval(v.then, envir2, wg)
+			wg.Add(1)
 
 
 		case print:
@@ -66,8 +66,8 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 			fmt.Printf("%d\n", int(integer))
 
-			wg.Add(1)
 			eval(v.then, envir, wg)
+			wg.Add(1)
 
 
 		case skip:
@@ -132,8 +132,8 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 			}
 
 			if v.eq == (val_l == val_r) {
-				wg.Add(1)
 				eval(v.then, envir, wg)
+				wg.Add(1)
 			}
 
 
@@ -153,9 +153,10 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 				envir = envir.set_value(pattern.v2.(variable), pair.v2)
 			}
 
-			wg.Add(2)
+			wg.Add(1)
 			go eval(v.then, envir, wg)
 			eval(v, envir, wg)
+			wg.Add(1)
 
 		default:
 			fmt.Printf("unrecognised type %T (%v)\n", v, v)
