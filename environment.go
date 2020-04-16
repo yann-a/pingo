@@ -64,3 +64,16 @@ func (e *env) get_value(x variable) value {
   // Otherwise we dive deeper in the environment
   return e.next.get_value(x)
 }
+
+func (e *env) set_from_pattern(p terminal, val value) *env {
+  switch pattern := p.(type) {
+    case variable:
+      return e.set_value(pattern, val)
+    case pair:
+      pair := val.(vpair)
+      env := e.set_value(pattern.v1.(variable), pair.v1)
+      return env.set_value(pattern.v2.(variable), pair.v2)
+    default:
+      panic("Not a value provided")
+  }
+}
