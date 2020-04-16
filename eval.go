@@ -132,7 +132,9 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 
 		case repl:
-			fmt.Printf("TODO: implement replication : %v", v)
+			wg.Add(2)
+			go eval(receiveThen{v.channel, v.pattern, v.then}, envir, wg)
+			eval(v, envir, wg)
 
 
 		default:
