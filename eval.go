@@ -138,10 +138,24 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 
 
 		case repl:
-			wg.Add(2)
-			go eval(receiveThen{v.channel, v.pattern, v.then}, envir, wg)
-			eval(v, envir, wg)
+			channel := envir.get_value(variable(v.channel), wg).(channel)
+			privateChan := make(chan value) // on ouvre un canal privé pour communiquer avec l'intermédiaire
 
+			channel.request <- privateChan
+			message := <- privateChan // on attend sa réponse sur le canal privé
+
+			switch pattern := v.pattern.(type) {
+			case variable:
+				envir = envir.set_value(pattern, message)
+			case pair:
+				pair := message.(vpair)
+				envir = envir.set_value(pattern.v1.(variable), pair.v1)
+				envir = envir.set_value(pattern.v2.(variable), pair.v2)
+			}
+
+			wg.Add(2)
+			go eval(v.then, envir, wg)
+			eval(v, envir, wg)
 
 		default:
 			fmt.Printf("unrecognised type %T (%v)\n", v, v)
