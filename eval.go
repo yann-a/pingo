@@ -131,7 +131,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup){
 				return
 			}
 
-			if (v.eq && val_l == val_r) || (!v.eq && val_l != val_r) {
+			if v.eq == (val_l == val_r) {
 				wg.Add(1)
 				eval(v.then, envir, wg)
 			}
