@@ -2,65 +2,69 @@ package main
 
 import "sync"
 
-// Concrete values
+/**** Concrete values ****/
 type value interface {
-  isValue()
+	isValue()
 }
 
-// channel defined in channel.go
+// channels are values (they can be sent through channels)
 type channel chan value
-func (c channel) isValue() { }
+
+func (c channel) isValue() {}
 
 // type constant is defined in eval.go and is also a terminal
-func (c constant) isValue() { }
+func (c constant) isValue() {}
 
 type vpair struct {
-  v1 value
-  v2 value
+	v1 value
+	v2 value
 }
-func (c vpair) isValue() { }
 
+func (c vpair) isValue() {}
 
-// Environment management
+/**** Environment ****/
 type env struct {
-  name variable
-  value value
-  next *env
+	name  variable
+	value value
+	next  *env
 }
 
+/**** Methods ****/
+// We append the value at the front of the environment
 func (e *env) set_value(x variable, v value) *env {
-  return &env{x, v, e}
+	return &env{x, v, e}
 }
 
-
-var accessToEnd sync.Mutex // The end of the environment cannot be updated by two goroutines at the same time
-                           // We prevent that from happening by using a mutex
+// The end of the environment cannot be updated by two goroutines at the same time
+// We prevent that from happening by using a mutex
+var accessToEnd sync.Mutex
 
 func (e *env) get_value(x variable) value {
-  if (e == nil) {
-    channel := make(channel)
-    e = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
+	if e == nil {
+		channel := make(channel)
+		// We add the new channel in the global space by appending it at the end of the environment
+		e = &env{x, channel, nil}
 
-    return channel
-  }
+		return channel
+	}
 
-  if e.name == x {
-    return e.value
-  }
+	if e.name == x {
+		return e.value
+	}
 
-  if e.next == nil { // on a atteint la fin de l'environnement
-    accessToEnd.Lock() // To avoid interferences between processes, we lock the mutex
-    defer accessToEnd.Unlock() // And make sure it's unlocked once we're done
+	// If we reach the end of the environment
+	if e.next == nil {
+		accessToEnd.Lock()         // To avoid interferences between processes, we lock the mutex
+		defer accessToEnd.Unlock() // And make sure it's unlocked once we're done
 
-    if e.next == nil { // If no concurrent access before getting the lock
-      channel := make(channel)
-      e.next = &env{x, channel, nil} // On ajoute le nouveau channel dans l'espace global en le mettant à la fin de l'environnement
+		if e.next == nil { // If no concurrent access before getting the lock
+			channel := make(channel)
+			// We add the new channel in the global space by appending it at the end of the environment
+			e.next = &env{x, channel, nil}
+			return channel
+		}
+	}
 
-      return channel
-    }
-  }
-
-
-  // Otherwise we dive deeper in the environment
-  return e.next.get_value(x)
+	// Otherwise we dive deeper in the environment
+	return e.next.get_value(x)
 }
