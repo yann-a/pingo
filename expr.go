@@ -46,8 +46,8 @@ func (e skip) isExpr() { }
 
 
 type choose struct {
-  e expr
-  f expr
+  e receiveThen
+  f receiveThen
 }
 func (e choose) isExpr() { }
 
