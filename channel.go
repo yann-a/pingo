@@ -34,6 +34,7 @@ func (ch *channel) infiniteBuffer(wg *sync.WaitGroup) {
 				buffer = append(buffer, elem)
         wg.Done() // on se met en pause en attendant une requête
       }
+
 		case request := <-ch.request:
 			if len(buffer) > 0 { // des éléments sont en attente
         request <- buffer[0]
