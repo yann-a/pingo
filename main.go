@@ -7,9 +7,13 @@ import (
 	"os"
 	"fmt"
 	"sync"
+	"flag"
 )
 
 func main() {
+	outputCode := flag.Bool("showsrc", false, "Output the code before executing it")
+	flag.Parse()
+
 	in := bufio.NewReader(os.Stdin)
 
 	lex := &exprLex{reader: in}
@@ -20,8 +24,10 @@ func main() {
 		return
 	}
 
-	fmt.Println(ret)
-
+	if *outputCode {
+		fmt.Println(ret)
+	}
+	
 	// We want all goroutines to have finished before killing the process
 	var wg sync.WaitGroup
 

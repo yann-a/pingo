@@ -21,13 +21,15 @@ import (
 }
 
 
-%type <ret> expr innerexpression
+%type <ret> expr innerexpression chooseexpression
 %type <v> pattern value literal
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
 %token OUTPUT PRINT
+%token CHOOSE EQUAL BRA KET REPL
 
+%left CHOOSE
 %left COMMA
 %left COLON
 %left PIPE
@@ -41,7 +43,7 @@ import (
 top: expr                                          { exprlex.(*exprLex).ret = $1           }
 
 expr:
-    innerexpression
+    chooseexpression
   | expr PIPE expr                                 {
                                                       switch v := $1.(type) {
                                                         case parallel: /* on met tous les process parallèles au même niveau */
@@ -51,14 +53,21 @@ expr:
                                                       }
                                                    }
 
+chooseexpression:
+    innerexpression
+  | chooseexpression CHOOSE chooseexpression       { $$ = choose{$1, $3}                   }
+
 innerexpression:
     INT                                            { $$ = skip($1)                         }
   | LPAREN expr RPAREN                             { $$ = $2                               }
   | LPAREN VAR RPAREN innerexpression              { $$ = privatize{$2, $4}                }
+  | REPL VAR pattern DOT innerexpression           { $$ = repl{$2, $3, $5}                 }
   | VAR pattern DOT innerexpression                { $$ = receiveThen{$1, $2, $4}          }
   | OUTPUT VAR value                               { $$ = send{$2, $3}                     }
   | PRINT value                                    { $$ = print{$2, skip(0)}               }
   | PRINT value COLON innerexpression              { $$ = print{$2, $4}                    }
+  | BRA value EQUAL value KET innerexpression      { $$ = conditional{$2, true, $4, $6}    }
+  | BRA value REPL EQUAL value KET innerexpression { $$ = conditional{$2, false, $5, $7}   }
 
 pattern: /* for reception */
     VAR                                            { $$ = variable($1)                     }
@@ -113,6 +122,16 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
         return COLON
       case '^':
         return OUTPUT
+      case '+':
+        return CHOOSE
+      case '=':
+        return EQUAL
+      case '[':
+        return BRA
+      case ']':
+        return KET
+      case '!':
+        return REPL
       case ' ', '\t', '\n', '\r':
       default:
         if unicode.IsLetter(c) {

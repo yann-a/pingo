@@ -45,6 +45,28 @@ type skip int
 func (e skip) isExpr() { }
 
 
+type choose struct {
+  e expr
+  f expr
+}
+func (e choose) isExpr() { }
+
+type conditional struct {
+  e terminal
+  eq bool
+  f terminal
+  then expr
+}
+func (e conditional) isExpr() { }
+
+type repl struct { // Replication of an input
+  channel string
+  pattern terminal
+  then expr
+}
+func (e repl) isExpr() { }
+
+
 
 // Values
 type terminal interface {
