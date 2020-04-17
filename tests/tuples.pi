@@ -1,0 +1,1 @@
+n(x, y).([x=y]print 1 | [x!=y]print 0) | ^n (5, 3)
