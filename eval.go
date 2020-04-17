@@ -36,7 +36,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 		wg.Add(1)
 
 	case privatize:
-		envir2 := envir.set_value(variable(v.channel), make(channel))
+		envir2 := envir.set_value(variable(v.channel), make(channel, 100))
 
 		eval(v.then, envir2, wg)
 		wg.Add(1)

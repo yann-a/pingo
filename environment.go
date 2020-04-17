@@ -41,7 +41,7 @@ var accessToEnd sync.Mutex
 
 func (e *env) get_value(x variable) value {
 	if e == nil {
-		channel := make(channel)
+		channel := make(channel, 100)
 		// We add the new channel in the global space by appending it at the end of the environment
 		e = &env{x, channel, nil}
 
@@ -58,7 +58,7 @@ func (e *env) get_value(x variable) value {
 		defer accessToEnd.Unlock() // And make sure it's unlocked once we're done
 
 		if e.next == nil { // If no concurrent access before getting the lock
-			channel := make(channel)
+			channel := make(channel, 100)
 			// We add the new channel in the global space by appending it at the end of the environment
 			e.next = &env{x, channel, nil}
 			return channel
