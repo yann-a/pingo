@@ -40,14 +40,6 @@ func (e *env) set_value(x variable, v value) *env {
 var accessToEnd sync.Mutex
 
 func (e *env) get_value(x variable) value {
-	if e == nil {
-		channel := make(channel, 100)
-		// We add the new channel in the global space by appending it at the end of the environment
-		e = &env{x, channel, nil}
-
-		return channel
-	}
-
 	if e.name == x {
 		return e.value
 	}
