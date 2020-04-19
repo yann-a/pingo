@@ -91,10 +91,10 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 		channel := envir.get_value(variable(v.channel)).(channel)
 		message := <-channel
 
-		envir = envir.set_from_pattern(v.pattern, message)
+		subenvir := envir.set_from_pattern(v.pattern, message)
 
 		wg.Add(1)
-		go eval(v.then, envir, wg)
+		go eval(v.then, subenvir, wg)
 		eval(v, envir, wg)
 		wg.Add(1)
 
