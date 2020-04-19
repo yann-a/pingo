@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+  "sync/atomic"
+  "unsafe"
+)
 
 /**** Concrete values ****/
 type value interface {
@@ -35,10 +38,6 @@ func (e *env) set_value(x variable, v value) *env {
 	return &env{x, v, e}
 }
 
-// The end of the environment cannot be updated by two goroutines at the same time
-// We prevent that from happening by using a mutex
-var accessToEnd sync.Mutex
-
 func (e *env) get_value(x variable) value {
 	if e.name == x {
 		return e.value
@@ -46,15 +45,15 @@ func (e *env) get_value(x variable) value {
 
 	// If we reach the end of the environment
 	if e.next == nil {
-		accessToEnd.Lock()         // To avoid interferences between processes, we lock the mutex
-		defer accessToEnd.Unlock() // And make sure it's unlocked once we're done
+		channel := make(channel, 100)
 
-		if e.next == nil { // If no concurrent access before getting the lock
-			channel := make(channel, 100)
-			// We add the new channel in the global space by appending it at the end of the environment
-			e.next = &env{x, channel, nil}
-			return channel
-		}
+    // On essaye de mettre à jour le pointeur de fin
+    unsafePointer := (*unsafe.Pointer)(unsafe.Pointer(&e.next))
+    if atomic.CompareAndSwapPointer(unsafePointer, nil, unsafe.Pointer(&env{x, channel, nil})) {
+		     return channel
+    }
+
+    close(channel) // in case of failure
 	}
 
 	// Otherwise we dive deeper in the environment
