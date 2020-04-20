@@ -3,7 +3,7 @@
 package lambda
 
 import (
-	"bufio"
+  "bufio"
   "bytes"
   "log"
   "unicode" // To tell apart letters from numbers
@@ -75,6 +75,13 @@ func (x *lambdaLex) Lex(yylval *lambdaSymType) int {
         return LPAREN
       case ')':
         return RPAREN
+      case '-':
+        c = x.getNextRune();
+        if c == '>'{
+          x.next()
+          return ARROW
+        }
+        // return MINUS
       case ' ', '\t', '\n', '\r':
       default:
         if unicode.IsLetter(c) {
@@ -152,6 +159,7 @@ func (x *lambdaLex) string(c rune, yylval *lambdaSymType) int {
 
   yylval.s = lvar(b.String())
 
+  if b.String() == "fun" { return FUN }
   return VAR
 }
 
@@ -168,6 +176,17 @@ func (x *lambdaLex) next() rune {
     return eof
   }
 
+  return c
+}
+
+func (x *lambdaLex) getNextRune() rune {
+  c, _, err := x.reader.ReadRune()
+
+  if err != nil {
+    return eof
+  }
+
+  x.reader.UnreadRune()
   return c
 }
 

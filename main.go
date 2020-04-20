@@ -17,7 +17,13 @@ func main() {
 
 	// The options of the executable
 	outputCode := flag.Bool("showsrc", false, "Output the code before executing it")
+	parseLambda := flag.Bool("lambda", false, "Parse input as lambda and print it")
 	flag.Parse()
+
+	if *parseLambda {
+		lambda.Test()
+		return
+	}
 
 	// Parsing
 	nonFlagsArgs := flag.Args()
