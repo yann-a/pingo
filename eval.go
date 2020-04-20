@@ -23,12 +23,15 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 			return
 		}
 
+		wg.Add(1) // We increment the counter to take into account the goroutine that will receive this message
 		channel := envir.get_value(variable(v.channel)).(channel)
 		channel <- val
 
 	case receiveThen:
 		channel := envir.get_value(variable(v.channel)).(channel)
-		message := <-channel
+
+		wg.Done() // in case the goroutine is paused
+		message := <-channel // the sender reincrements wg when sending a message
 
 		envir = envir.set_from_pattern(v.pattern, message)
 
@@ -36,7 +39,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 		wg.Add(1)
 
 	case privatize:
-		envir2 := envir.set_value(variable(v.channel), make(channel, 100))
+		envir2 := envir.set_value(variable(v.channel), make(channel))
 
 		eval(v.then, envir2, wg)
 		wg.Add(1)

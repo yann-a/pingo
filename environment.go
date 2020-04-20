@@ -45,7 +45,7 @@ func (e *env) get_value(x variable) value {
 
 	// If we reach the end of the environment
 	if e.next == nil {
-		channel := make(channel, 100)
+		channel := make(channel)
 
     // On essaye de mettre à jour le pointeur de fin
     unsafePointer := (*unsafe.Pointer)(unsafe.Pointer(&e.next))
