@@ -1,4 +1,5 @@
 //go:generate goyacc -o pilang.go -v pilang.output -p "expr" pilang.y
+//go:generate goyacc -o lambda/lambda.go -v lambda/lambda.output -p "lambda" lambda/lambda.y
 
 package main
 
@@ -8,9 +9,12 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"pingo/lambda"
 )
 
 func main() {
+	_ = lambda.ShutUp
+
 	// The options of the executable
 	outputCode := flag.Bool("showsrc", false, "Output the code before executing it")
 	flag.Parse()
