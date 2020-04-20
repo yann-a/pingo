@@ -1,8 +1,8 @@
 package main
 
 import (
-  "sync/atomic"
-  "unsafe"
+	"sync/atomic"
+	"unsafe"
 )
 
 /**** Concrete values ****/
@@ -47,13 +47,13 @@ func (e *env) get_value(x variable) value {
 	if e.next == nil {
 		channel := make(channel)
 
-    // On essaye de mettre à jour le pointeur de fin
-    unsafePointer := (*unsafe.Pointer)(unsafe.Pointer(&e.next))
-    if atomic.CompareAndSwapPointer(unsafePointer, nil, unsafe.Pointer(&env{x, channel, nil})) {
-		     return channel
-    }
+		// On essaye de mettre à jour le pointeur de fin
+		unsafePointer := (*unsafe.Pointer)(unsafe.Pointer(&e.next))
+		if atomic.CompareAndSwapPointer(unsafePointer, nil, unsafe.Pointer(&env{x, channel, nil})) {
+			return channel
+		}
 
-    close(channel) // in case of failure
+		close(channel) // in case of failure
 	}
 
 	// Otherwise we dive deeper in the environment

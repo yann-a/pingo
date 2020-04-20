@@ -30,7 +30,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 	case receiveThen:
 		channel := envir.get_value(variable(v.channel)).(channel)
 
-		wg.Done() // in case the goroutine is paused
+		wg.Done()            // in case the goroutine is paused
 		message := <-channel // the sender reincrements wg when sending a message
 
 		envir = envir.set_from_pattern(v.pattern, message)

@@ -8,8 +8,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"sync"
 	"pingo/lambda"
+	"sync"
 )
 
 func main() {
