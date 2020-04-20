@@ -65,6 +65,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 		channel1 := envir.get_value(variable(v.e.channel)).(channel)
 		channel2 := envir.get_value(variable(v.f.channel)).(channel)
 
+		wg.Done()
 		select {
 		case val := <-channel1:
 			envir = envir.set_from_pattern(v.e.pattern, val)
@@ -92,6 +93,7 @@ func eval(e expr, envir *env, wg *sync.WaitGroup) {
 
 	case repl:
 		channel := envir.get_value(variable(v.channel)).(channel)
+		wg.Done()
 		message := <-channel
 
 		subenvir := envir.set_from_pattern(v.pattern, message)
