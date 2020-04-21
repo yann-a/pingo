@@ -1,8 +1,8 @@
 package translate
 
 import (
-	"../lambda"
-	"../pi"
+	"pingo/src/lambda"
+	"pingo/src/pi"
 )
 
 func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
