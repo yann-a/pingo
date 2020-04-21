@@ -16,6 +16,7 @@ func Test() {
 		if err != nil {
 			fmt.Printf("Couldn't read from %s (%s). Reading from stdin\n", nonFlagsArgs[0], err)
 		} else {
+			defer file.Close()
 			buffer = file
 		}
 	}

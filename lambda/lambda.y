@@ -9,6 +9,7 @@ import (
   "unicode" // To tell apart letters from numbers
   "unicode/utf8"
   "strconv"
+  "fmt"
 )
 
 %}
@@ -90,8 +91,7 @@ func (x *lambdaLex) Lex(yylval *lambdaSymType) int {
           return x.num(c, yylval)
         }
 
-        x.reader.UnreadRune()
-        log.Printf("unrecognized character %q", c)
+        panic(fmt.Sprintf("unrecognized character %q", c))
       }
   }
 }
