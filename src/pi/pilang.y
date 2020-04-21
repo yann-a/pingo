@@ -102,6 +102,15 @@ type exprLex struct {
   reader *bufio.Reader
 }
 
+func Parse(in *bufio.Reader) Expr {
+  lex := &exprLex{reader: in}
+  if exprParse(lex) == 1 {
+    panic("Parsing error")
+  }
+  
+  return lex.ret
+}
+
 // The parser calls this method to get each new token. This
 // implementation returns operators and NUM.
 func (x *exprLex) Lex(yylval *exprSymType) int {

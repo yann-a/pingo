@@ -6,10 +6,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"bufio"
+	"sync"
 	"pingo/src/lambda"
 	"pingo/src/pi"
 	"pingo/src/translate"
-	"sync"
 )
 
 func main() {
@@ -19,18 +21,34 @@ func main() {
 	translateInput := flag.Bool("translate", false, "Parse input as lambda, translate in pi and execute")
 	flag.Parse()
 
+	// Parsing
+	nonFlagArgs := flag.Args()
+	buffer := os.Stdin
+	// If a file is provided we try reading from it
+	if len(nonFlagArgs) > 0 {
+		file, err := os.Open(nonFlagArgs[0])
+		if err != nil {
+			fmt.Printf("Couldn't read from %s (%s). Reading from stdin\n", nonFlagArgs[0], err)
+		} else {
+			defer file.Close()
+			buffer = file
+		}
+	}
+	in := bufio.NewReader(buffer)
+
 	var ret pi.Expr
 	if *translateInput {
+		lambdaCode := lambda.Parse(in)
 		if *showSrc {
-			lambda.Test()
+			fmt.Println(lambdaCode)
 		}
-		t := translate.Translate(lambda.GetParsedInput(), "p")
+		t := translate.Translate(lambdaCode, "p")
 		ret = pi.Parallel{t, pi.ReceiveThen{"p", pi.Variable("x"), pi.Print{pi.Variable("x"), pi.Skip(0)}}}
 	} else {
+		ret = pi.Parse(in)
 		if *showSrc {
-			pi.Test()
+			fmt.Println(ret)
 		}
-		ret = pi.GetParsedInput()
 	}
 
 	if ret == nil {

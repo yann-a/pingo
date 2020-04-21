@@ -5,6 +5,10 @@ import (
 	"sync"
 )
 
+func Launch(e Expr, wg *sync.WaitGroup) {
+	eval(e, &env{}, wg)
+}
+
 func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 	defer wg.Done() // We make sure we mark the process as finished at the end
 

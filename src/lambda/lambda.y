@@ -64,6 +64,15 @@ type lambdaLex struct {
   reader *bufio.Reader
 }
 
+func Parse(in *bufio.Reader) Lambda {
+  lex := &lambdaLex{reader: in}
+  if lambdaParse(lex) == 1 {
+    panic("Parsing error")
+  }
+
+  return lex.ret
+}
+
 // The parser calls this method to get each new token. This
 // implementation returns operators and NUM.
 func (x *lambdaLex) Lex(yylval *lambdaSymType) int {
