@@ -1,4 +1,4 @@
-package main
+package pi
 
 import (
 	"sync/atomic"
@@ -6,46 +6,46 @@ import (
 )
 
 /**** Concrete values ****/
-type value interface {
+type Value interface {
 	isValue()
 }
 
 // channels are values (they can be sent through channels)
-type channel chan value
+type Channel chan Value
 
-func (c channel) isValue() {}
+func (c Channel) isValue() {}
 
 // type constant is defined in eval.go and is also a terminal
-func (c constant) isValue() {}
+func (c Constant) isValue() {}
 
-type vpair struct {
-	v1 value
-	v2 value
+type Vpair struct {
+	V1 Value
+	V2 Value
 }
 
-func (c vpair) isValue() {}
+func (c Vpair) isValue() {}
 
 /**** Environment ****/
 type env struct {
-	name  variable
-	value value
+	name  Variable
+	value Value
 	next  *env
 }
 
 /**** Methods ****/
 // We append the value at the front of the environment
-func (e *env) set_value(x variable, v value) *env {
+func (e *env) set_value(x Variable, v Value) *env {
 	return &env{x, v, e}
 }
 
-func (e *env) get_value(x variable) value {
+func (e *env) get_value(x Variable) Value {
 	if e.name == x {
 		return e.value
 	}
 
 	// If we reach the end of the environment
 	if e.next == nil {
-		channel := make(channel)
+		channel := make(Channel)
 
 		// On essaye de mettre à jour le pointeur de fin
 		unsafePointer := (*unsafe.Pointer)(unsafe.Pointer(&e.next))
@@ -60,14 +60,14 @@ func (e *env) get_value(x variable) value {
 	return e.next.get_value(x)
 }
 
-func (e *env) set_from_pattern(p terminal, val value) *env {
+func (e *env) set_from_pattern(p Terminal, val Value) *env {
 	switch pattern := p.(type) {
-	case variable:
+	case Variable:
 		return e.set_value(pattern, val)
-	case pair:
-		pair := val.(vpair)
-		env := e.set_value(pattern.v1.(variable), pair.v1)
-		return env.set_value(pattern.v2.(variable), pair.v2)
+	case Pair:
+		pair := val.(Vpair)
+		env := e.set_value(pattern.V1.(Variable), pair.V1)
+		return env.set_value(pattern.V2.(Variable), pair.V2)
 	default:
 		panic("Not a value provided")
 	}

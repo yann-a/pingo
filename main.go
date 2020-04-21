@@ -1,62 +1,44 @@
-//go:generate goyacc -o pilang.go -v pilang.output -p "expr" pilang.y
-//go:generate goyacc -o lambda/lambda.go -v lambda/lambda.output -p "lambda" lambda/lambda.y
+//go:generate goyacc -o src/pi/pilang.go -v src/pi/pilang.output -p "expr" src/pi/pilang.y
+//go:generate goyacc -o src/lambda/lambda.go -v src/lambda/lambda.output -p "lambda" src/lambda/lambda.y
 
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	"os"
-	"pingo/lambda"
+	"pingo/src/lambda"
+	"pingo/src/pi"
+	"pingo/src/translate"
 	"sync"
 )
 
 func main() {
 	// The options of the executable
-	outputCode := flag.Bool("showsrc", false, "Output the code before executing it")
-	parseLambda := flag.Bool("lambda", false, "Parse input as lambda and print it")
+	showSrc := flag.Bool("showsrc", false, "Output the parsed code")
+	outCode := flag.Bool("outcode", false, "Output the code before executing it (after translation if any")
 	translateInput := flag.Bool("translate", false, "Parse input as lambda, translate in pi and execute")
 	flag.Parse()
 
-	if *parseLambda {
-		lambda.Test()
-		return
-	}
-
-	// Parsing
-	nonFlagsArgs := flag.Args()
-	buffer := os.Stdin
-	// If a file is provided we try reading from it
-	if len(nonFlagsArgs) > 0 {
-		file, err := os.Open(nonFlagsArgs[0])
-		if err != nil {
-			fmt.Printf("Couldn't read from %s (%s). Reading from stdin\n", nonFlagsArgs[0], err)
-		} else {
-			defer file.Close()
-			buffer = file
-		}
-	}
-	in := bufio.NewReader(buffer)
-
-	var ret expr
+	var ret pi.Expr
 	if *translateInput {
-		ret = parallel{translate(lambda.GetParsedInput(), "p"), receiveThen{"p", variable("x"), print{variable("x"), skip(0)}}}
-	} else {
-		lex := &exprLex{reader: in}
-		if exprParse(lex) == 1 {
-			panic("Parsing error")
+		if *showSrc {
+			lambda.Test()
 		}
-		ret = lex.ret
+		t := translate.Translate(lambda.GetParsedInput(), "p")
+		ret = pi.Parallel{t, pi.ReceiveThen{"p", pi.Variable("x"), pi.Print{pi.Variable("x"), pi.Skip(0)}}}
+	} else {
+		if *showSrc {
+			pi.Test()
+		}
+		ret = pi.GetParsedInput()
 	}
-	
-	
+
 	if ret == nil {
 		return
 	}
 
 	// We print the code if asked
-	if *outputCode {
+	if *outCode {
 		fmt.Println(ret)
 	}
 
@@ -65,7 +47,7 @@ func main() {
 
 	wg.Add(1)
 	// We launch the evaluation in a goroutine
-	go eval(ret, &env{}, &wg)
+	go pi.Launch(ret, &wg)
 
 	wg.Wait() // We wait for all goroutines to terminate
 }

@@ -1,6 +1,6 @@
 %{
 
-package main
+package pi
 
 import (
 	"bufio"
@@ -15,8 +15,8 @@ import (
 %}
 
 %union {
-  ret expr
-  v terminal
+  ret Expr
+  v Terminal
   num int
   s string
 }
@@ -48,42 +48,42 @@ expr:
   | expr PIPE expr                                 {
                                                       switch v := $1.(type) {
                                                         /* We put all piped processes at the same level */
-                                                        case parallel:
-                                                          $$ = parallel(append([]expr(v), $3))
+                                                        case Parallel:
+                                                          $$ = Parallel(append([]Expr(v), $3))
                                                         default:
-                                                          $$ = parallel{$1, $3}
+                                                          $$ = Parallel{$1, $3}
                                                       }
                                                    }
 
 chooseexpression:
     innerexpression
-  | chooseexpression CHOOSE chooseexpression       { $$ = choose{$1.(receiveThen), $3.(receiveThen)} }
+  | chooseexpression CHOOSE chooseexpression       { $$ = Choose{$1.(ReceiveThen), $3.(ReceiveThen)} }
 
 innerexpression:
-    INT                                            { $$ = skip($1)                         }
+    INT                                            { $$ = Skip($1)                         }
   | LPAREN expr RPAREN                             { $$ = $2                               }
-  | LPAREN VAR RPAREN innerexpression              { $$ = privatize{$2, $4}                }
-  | REPL VAR pattern DOT innerexpression           { $$ = repl{$2, $3, $5}                 }
-  | VAR pattern DOT innerexpression                { $$ = receiveThen{$1, $2, $4}          }
-  | OUTPUT VAR value                               { $$ = send{$2, $3}                     }
-  | PRINT value                                    { $$ = print{$2, skip(0)}               }
-  | PRINT value COLON innerexpression              { $$ = print{$2, $4}                    }
-  | BRA value EQUAL value KET innerexpression      { $$ = conditional{$2, true, $4, $6}    }
-  | BRA value REPL EQUAL value KET innerexpression { $$ = conditional{$2, false, $5, $7}   }
+  | LPAREN VAR RPAREN innerexpression              { $$ = Privatize{$2, $4}                }
+  | REPL VAR pattern DOT innerexpression           { $$ = Repl{$2, $3, $5}                 }
+  | VAR pattern DOT innerexpression                { $$ = ReceiveThen{$1, $2, $4}          }
+  | OUTPUT VAR value                               { $$ = Send{$2, $3}                     }
+  | PRINT value                                    { $$ = Print{$2, Skip(0)}               }
+  | PRINT value COLON innerexpression              { $$ = Print{$2, $4}                    }
+  | BRA value EQUAL value KET innerexpression      { $$ = Conditional{$2, true, $4, $6}    }
+  | BRA value REPL EQUAL value KET innerexpression { $$ = Conditional{$2, false, $5, $7}   }
 
 pattern: /* for reception */
-    VAR                                            { $$ = variable($1)                     }
-  | VAR COMMA VAR                                  { $$ = pair{variable($1), variable($3)} }
+    VAR                                            { $$ = Variable($1)                     }
+  | VAR COMMA VAR                                  { $$ = Pair{Variable($1), Variable($3)} }
   | LPAREN pattern RPAREN                          { $$ = $2                               }
 
 value: /* for sending */
     literal
-  | literal COMMA literal                          { $$ = pair{$1, $3}                     }
+  | literal COMMA literal                          { $$ = Pair{$1, $3}                     }
   | LPAREN value RPAREN                            { $$ = $2                               }
 
 literal:
-    INT                                            { $$ = constant($1)                     }
-  | VAR                                            { $$ = variable($1)                     }
+    INT                                            { $$ = Constant($1)                     }
+  | VAR                                            { $$ = Variable($1)                     }
 
 
 
@@ -98,7 +98,7 @@ const eof = 0
 // The parser uses the type <prefix>Lex as a lexer. It must provide
 // the methods Lex(*<prefix>SymType) int and Error(string).
 type exprLex struct {
-  ret expr
+  ret Expr
   reader *bufio.Reader
 }
 

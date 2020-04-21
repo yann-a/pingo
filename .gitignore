@@ -1,5 +1,5 @@
-pilang.go
-pilang.output
 pingo
-lambda/lambda.go
-lambda/lambda.output
+src/pi/pilang.go
+src/pi/pilang.output
+src/lambda/lambda.go
+src/lambda/lambda.output

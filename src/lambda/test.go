@@ -2,9 +2,9 @@ package lambda
 
 import (
 	"bufio"
-	"os"
-	"fmt"
 	"flag"
+	"fmt"
+	"os"
 )
 
 func Test() {
