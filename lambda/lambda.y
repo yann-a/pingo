@@ -15,9 +15,9 @@ import (
 %}
 
 %union {
-  ret lambda
-  num lconst
-  s lvar
+  ret Lambda
+  num Lconst
+  s Lvar
 }
 
 
@@ -34,15 +34,15 @@ top: lambda                                        { lambdalex.(*lambdaLex).ret 
 
 lambda:
     application                                    { $$ = $1                               }
-  | FUN VAR fundefinition                          { $$ = lfun{$2, $3}                     }
+  | FUN VAR fundefinition                          { $$ = Lfun{$2, $3}                     }
 
 fundefinition:
     ARROW lambda                                   { $$ = $2                               }
-  | VAR fundefinition                              { $$ = lfun{$1, $2}                     }
+  | VAR fundefinition                              { $$ = Lfun{$1, $2}                     }
 
 application:
     litteral                                       { $$ = $1                               }
-  | application litteral                           { $$ = lapp{$1, $2}                     }
+  | application litteral                           { $$ = Lapp{$1, $2}                     }
 
 litteral:
     INT                                            { $$ = $1                               }
@@ -60,7 +60,7 @@ const eof = 0
 // The parser uses the type <prefix>Lex as a lexer. It must provide
 // the methods Lex(*<prefix>SymType) int and Error(string).
 type lambdaLex struct {
-  ret lambda
+  ret Lambda
   reader *bufio.Reader
 }
 
@@ -127,7 +127,7 @@ func (x *lambdaLex) num(c rune, yylval *lambdaSymType) int {
     return eof
   }
 
-  yylval.num = lconst(v)
+  yylval.num = Lconst(v)
 
   return INT
 }
@@ -157,7 +157,7 @@ func (x *lambdaLex) string(c rune, yylval *lambdaSymType) int {
     }
   }
 
-  yylval.s = lvar(b.String())
+  yylval.s = Lvar(b.String())
 
   if b.String() == "fun" { return FUN }
   return VAR

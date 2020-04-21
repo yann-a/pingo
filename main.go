@@ -13,11 +13,10 @@ import (
 )
 
 func main() {
-	_ = lambda.ShutUp
-
 	// The options of the executable
 	outputCode := flag.Bool("showsrc", false, "Output the code before executing it")
 	parseLambda := flag.Bool("lambda", false, "Parse input as lambda and print it")
+	translateInput := flag.Bool("translate", false, "Parse input as lambda, translate in pi and execute")
 	flag.Parse()
 
 	if *parseLambda {
@@ -40,12 +39,18 @@ func main() {
 	}
 	in := bufio.NewReader(buffer)
 
-	lex := &exprLex{reader: in}
-	if exprParse(lex) == 1 {
-		panic("Parsing error")
+	var ret expr
+	if *translateInput {
+		ret = parallel{translate(lambda.GetParsedInput(), "p"), receiveThen{"p", variable("x"), print{variable("x"), skip(0)}}}
+	} else {
+		lex := &exprLex{reader: in}
+		if exprParse(lex) == 1 {
+			panic("Parsing error")
+		}
+		ret = lex.ret
 	}
-
-	ret := lex.ret
+	
+	
 	if ret == nil {
 		return
 	}

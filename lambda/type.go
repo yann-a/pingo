@@ -1,30 +1,28 @@
 package lambda
 
-var ShutUp = "I'm just here to make go shut up"
-
-type lambda interface {
+type Lambda interface {
 	isLambda() // To indicate a type is an expression
 	//String() string // To print the code
 }
 
-type lconst int
+type Lconst int
 
-func (l lconst) isLambda() {}
+func (l Lconst) isLambda() {}
 
-type lvar string
+type Lvar string
 
-func (l lvar) isLambda() {}
+func (l Lvar) isLambda() {}
 
-type lfun struct {
-	arg lvar
-	exp lambda
+type Lfun struct {
+	Arg Lvar
+	Exp Lambda
 }
 
-func (l lfun) isLambda() {}
+func (l Lfun) isLambda() {}
 
-type lapp struct {
-	fun lambda
-	exp lambda
+type Lapp struct {
+	Fun Lambda
+	Exp Lambda
 }
 
-func (l lapp) isLambda() {}
+func (l Lapp) isLambda() {}

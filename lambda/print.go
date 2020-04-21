@@ -10,10 +10,10 @@ func (e lvar) String() string {
 	return fmt.Sprintf("%s", e)
 }*/
 
-func (e lfun) String() string {
-	return fmt.Sprintf("(fun %v -> %v)", e.arg, e.exp)
+func (e Lfun) String() string {
+	return fmt.Sprintf("(fun %v -> %v)", e.Arg, e.Exp)
 }
 
-func (e lapp) String() string {
-	return fmt.Sprintf("(%v %v)", e.fun, e.exp)
+func (e Lapp) String() string {
+	return fmt.Sprintf("(%v %v)", e.Fun, e.Exp)
 }
