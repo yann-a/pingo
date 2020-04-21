@@ -3,7 +3,15 @@ A pi-calculus interpreter written in Go
 
 <img src="media/pingo.png" align="right" alt="pingo" width="250"/>
 
+## Temporary warning ##
+Currently, the translation from lambda to pi is then passed to the `print` function from pi-calculus.
+Hence it might fail if the code returns something else than an int.
+This will change in the near future when lambda will embed the print function
+
 ## Requirements
+To compile, **your Go version must be greater than 1.14**.
+To verify that, type `go version`
+
 The parsing is done using goyacc.
 To install it, run one of the following :
 ~~~
@@ -21,6 +29,7 @@ sudo apt install golang-golang-x-tools
 + run with `./pingo [options] [file]`
 
 ## Syntax
+For pi-calculus:
 + `0` : the null instruction
 + `P | Q` : run P and Q in parallel
 + `^n m` : send m on channel n
@@ -34,8 +43,14 @@ sudo apt install golang-golang-x-tools
 + `[x=y]P` or `[x!=y]P` : run P if the condition between brackets is met
 + `a(x).P + b(x).Q` : non-deterministic choice : we go on with P if we read from `a` first, or Q if we read from `b`
 
+For lambda-calculus:
++ `fun x -> l` : the function that associates l to the variable x
++ `m n` : apply the function m to argument n
+
 ## Features
 The available options are :
-+ `-showsrc` to show the parsed input before running it
++ `-showsrc` to show the parsed input
++ `-outcode` to show the code that's going to be executed (different from showsrc only of a translation happened)
++ `-translation` to parse lambda-calculus code and translate it into pi-calculus before execution
 
 The executable reads from a file if provided, or stdin if none was provided or reading from the file failed, until EOF (or Ctrl+D in command line) is met
