@@ -41,7 +41,9 @@ func main() {
 	in := bufio.NewReader(buffer)
 
 	lex := &exprLex{reader: in}
-	exprParse(lex)
+	if exprParse(lex) == 1 {
+		panic("Parsing error")
+	}
 
 	ret := lex.ret
 	if ret == nil {

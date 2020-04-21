@@ -23,7 +23,9 @@ func Test() {
 	in := bufio.NewReader(buffer)
 
 	lex := &lambdaLex{reader: in}
-	lambdaParse(lex)
+	if lambdaParse(lex) == 1 {
+		panic("Parsing error")
+	}
 
 	fmt.Printf("Understood : %v\n", lex.ret)
 }
