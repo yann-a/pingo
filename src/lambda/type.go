@@ -54,3 +54,9 @@ type Div struct {
 }
 
 func (l Div) isLambda() {}
+
+type Print struct {
+	L Lambda
+}
+
+func (l Print) isLambda() {}
