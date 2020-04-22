@@ -47,7 +47,7 @@ func main() {
 	wg.Wait() // We wait for all goroutines to terminate
 }
 
-// returns parsed input from buffer
+// returns the parsed input from buffer
 func Parse(in *bufio.Reader, translateInput, showSrc bool) (ret pi.Expr) {
 	if translateInput {
 		lambdaCode := lambda.Parse(in)
