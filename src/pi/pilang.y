@@ -94,8 +94,8 @@ value: /* for sending */
 
 /* Arithmetic operations must be between parenthesis */
 arithvalue:
-    arithvalue
-  | arithvalue COMMA arithvalue                    { $$ = Pair{$1, $3}                     }
+    arith
+  | arith COMMA arith                              { $$ = Pair{$1, $3}                     }
   | LPAREN arithvalue RPAREN                       { $$ = $2                               }
 
 arith:
