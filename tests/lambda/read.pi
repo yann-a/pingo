@@ -1,0 +1,1 @@
+(fun a b -> y<-a; z<-b; w<-a; print ((y+z)*w)) (ref 5) (ref 12)
