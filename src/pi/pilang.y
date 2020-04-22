@@ -22,20 +22,28 @@ import (
 }
 
 
-%type <ret> expr innerexpression chooseexpression
-%type <v> pattern value literal
+%type <ret> expr innerexpression chooseExpression receiveThen
+%type <v> pattern value literal arithvalue arith
 %token LPAREN RPAREN DOT PIPE COMMA COLON
 %token <num> INT
 %token <s> VAR
 %token OUTPUT PRINT
-%token CHOOSE EQUAL BRA KET REPL
+%token EQUAL BRA KET REPL
+%token PLUS MINUS TIMES DIV
 
-%left CHOOSE
+%left PLUS /* + et * sont associatifs à gauche; et * est distributif sur + */
+%left MINUS
+%left TIMES
+%left DIV
+
+%left CAPTUREPLUS
+
 %left COMMA
 %left COLON
 %left PIPE
 
 %nonassoc RPAREN
+
 
 
 /*********** Parser ***********/
@@ -44,7 +52,7 @@ import (
 top: expr                                          { exprlex.(*exprLex).ret = $1           }
 
 expr:
-    chooseexpression
+    chooseExpression
   | expr PIPE expr                                 {
                                                       switch v := $1.(type) {
                                                         /* We put all piped processes at the same level */
@@ -55,21 +63,24 @@ expr:
                                                       }
                                                    }
 
-chooseexpression:
+chooseExpression:
     innerexpression
-  | chooseexpression CHOOSE chooseexpression       { $$ = Choose{$1.(ReceiveThen), $3.(ReceiveThen)} }
+  | receiveThen PLUS receiveThen                   { $$ = Choose{$1.(ReceiveThen), $3.(ReceiveThen)} }
 
 innerexpression:
     INT                                            { $$ = Skip($1)                         }
   | LPAREN expr RPAREN                             { $$ = $2                               }
   | LPAREN VAR RPAREN innerexpression              { $$ = Privatize{$2, $4}                }
   | REPL VAR pattern DOT innerexpression           { $$ = Repl{$2, $3, $5}                 }
-  | VAR pattern DOT innerexpression                { $$ = ReceiveThen{$1, $2, $4}          }
+  | receiveThen                                    { $$ = $1                               }
   | OUTPUT VAR value                               { $$ = Send{$2, $3}                     }
   | PRINT value                                    { $$ = Print{$2, Skip(0)}               }
   | PRINT value COLON innerexpression              { $$ = Print{$2, $4}                    }
   | BRA value EQUAL value KET innerexpression      { $$ = Conditional{$2, true, $4, $6}    }
   | BRA value REPL EQUAL value KET innerexpression { $$ = Conditional{$2, false, $5, $7}   }
+
+receiveThen:
+  VAR pattern DOT innerexpression                { $$ = ReceiveThen{$1, $2, $4}          }
 
 pattern: /* for reception */
     VAR                                            { $$ = Variable($1)                     }
@@ -79,7 +90,21 @@ pattern: /* for reception */
 value: /* for sending */
     literal
   | literal COMMA literal                          { $$ = Pair{$1, $3}                     }
-  | LPAREN value RPAREN                            { $$ = $2                               }
+  | LPAREN arithvalue RPAREN                       { $$ = $2                               }
+
+/* Arithmetic operations must be between parenthesis */
+arithvalue:
+    arithvalue
+  | arithvalue COMMA arithvalue                    { $$ = Pair{$1, $3}                     }
+  | LPAREN arithvalue RPAREN                       { $$ = $2                               }
+
+arith:
+    literal
+  | arith PLUS arith                               { $$ = Add{$1, $3}                      }
+  | arith MINUS arith                              { $$ = Sub{$1, $3}                      }
+  | arith TIMES arith                              { $$ = Mul{$1, $3}                      }
+  | arith DIV arith                                { $$ = Div{$1, $3}                      }
+
 
 literal:
     INT                                            { $$ = Constant($1)                     }
@@ -107,7 +132,7 @@ func Parse(in *bufio.Reader) Expr {
   if exprParse(lex) == 1 {
     panic("Parsing error")
   }
-  
+
   return lex.ret
 }
 
@@ -134,7 +159,13 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
       case '^':
         return OUTPUT
       case '+':
-        return CHOOSE
+        return PLUS
+      case '-':
+        return MINUS
+      case '/':
+        return DIV
+      case '*':
+        return TIMES
       case '=':
         return EQUAL
       case '[':

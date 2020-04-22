@@ -82,16 +82,37 @@ type Terminal interface {
 }
 
 type Constant int
-
 func (c Constant) isTerminal() {}
 
 type Variable string
-
 func (c Variable) isTerminal() {}
 
 type Pair struct {
 	V1 Terminal
 	V2 Terminal
 }
-
 func (c Pair) isTerminal() {}
+
+type Add struct {
+	V1 Terminal
+	V2 Terminal
+}
+func (c Add) isTerminal() {}
+
+type Sub struct {
+	V1 Terminal
+	V2 Terminal
+}
+func (c Sub) isTerminal() {}
+
+type Mul struct {
+	V1 Terminal
+	V2 Terminal
+}
+func (c Mul) isTerminal() {}
+
+type Div struct {
+	V1 Terminal
+	V2 Terminal
+}
+func (c Div) isTerminal() {}

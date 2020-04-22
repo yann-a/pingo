@@ -21,11 +21,7 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		}
 
 	case Send:
-		val, ok := interpretTerminal(v.Value, envir)
-		if !ok {
-			fmt.Println("Error while sending: not a value provided\n")
-			return
-		}
+		val := interpretTerminal(v.Value, envir)
 
 		wg.Add(1) // We increment the counter to take into account the goroutine that will receive this message
 		channel := envir.get_value(Variable(v.Channel)).(Channel)
@@ -49,11 +45,7 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		wg.Add(1)
 
 	case Print:
-		ret, ok := interpretTerminal(v.V, envir)
-		if !ok {
-			fmt.Println("Error while printing: not a value provided\n")
-			return
-		}
+		ret := interpretTerminal(v.V, envir)
 
 		integer := ret.(Constant)
 
@@ -83,12 +75,8 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		}
 
 	case Conditional:
-		val_l, ok_l := interpretTerminal(v.E, envir)
-		val_r, ok_r := interpretTerminal(v.F, envir)
-		if !ok_l || !ok_r {
-			fmt.Printf("Error : can't compare non-values expressions (%v and %v)\n", v.E, v.F)
-			return
-		}
+		val_l := interpretTerminal(v.E, envir)
+		val_r := interpretTerminal(v.F, envir)
 
 		if v.Eq == (val_l == val_r) {
 			eval(v.Then, envir, wg)
@@ -113,18 +101,26 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 }
 
 // Transform a terminal expression into a value
-func interpretTerminal(val Terminal, envir *env) (Value, bool) {
+func interpretTerminal(val Terminal, envir *env) Value {
 	switch v := val.(type) {
 	case Constant:
-		return v, true
+		return v
 	case Variable:
-		return envir.get_value(v), true
+		return envir.get_value(v)
 	case Pair:
-		v1, ok1 := interpretTerminal(v.V1, envir)
-		v2, ok2 := interpretTerminal(v.V2, envir)
+		v1 := interpretTerminal(v.V1, envir)
+		v2 := interpretTerminal(v.V2, envir)
 
-		return Vpair{v1, v2}, ok1 && ok2
+		return Vpair{v1, v2}
+	case Add:
+		return interpretTerminal(v.V1, envir).(Constant) + interpretTerminal(v.V2, envir).(Constant)
+	case Sub:
+		return interpretTerminal(v.V1, envir).(Constant) - interpretTerminal(v.V2, envir).(Constant)
+	case Mul:
+		return interpretTerminal(v.V1, envir).(Constant) * interpretTerminal(v.V2, envir).(Constant)
+	case Div:
+		return interpretTerminal(v.V1, envir).(Constant) / interpretTerminal(v.V2, envir).(Constant)
 	default:
-		return Constant(0), false
+		panic("not a value provided")
 	}
 }
