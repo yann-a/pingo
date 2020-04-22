@@ -37,6 +37,8 @@ func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
 		return pi.Privatize{channel1, pi.Privatize{channel2, pi.Parallel{Translate(v.L, channel1), Translate(v.R, channel2), pi.ReceiveThen{channel1, pi.Variable("lresult"), pi.ReceiveThen{channel2, pi.Variable("rresult"), pi.Send{channel, pi.Mul{pi.Variable("lresult"), pi.Variable("rresult")}}}}}}}
 	case lambda.Div:
 		return pi.Privatize{channel1, pi.Privatize{channel2, pi.Parallel{Translate(v.L, channel1), Translate(v.R, channel2), pi.ReceiveThen{channel1, pi.Variable("lresult"), pi.ReceiveThen{channel2, pi.Variable("rresult"), pi.Send{channel, pi.Div{pi.Variable("lresult"), pi.Variable("rresult")}}}}}}}
+	case lambda.Print:
+		return pi.Privatize{channel1, pi.Parallel{Translate(v.L, channel1), pi.ReceiveThen{channel1, pi.Variable("result"), pi.Print{pi.Variable("result"), pi.Send{channel, pi.Variable("result")}}}}}
 	default:
 		panic("not supposed to happen")
 	}
