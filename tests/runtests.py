@@ -45,7 +45,7 @@ import re
 import yaml
 import subprocess
 
-for file in glob.glob('tests/*.pi'):
+for file in glob.glob('tests/pi/*.pi'):
     result = subprocess.run(['./pingo', file], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     with open(file[:-3] + ".expect", 'r') as stream:
@@ -60,3 +60,13 @@ for file in glob.glob('tests/*.pi'):
                 print("error while executing "+file)
         except yaml.YAMLError as exc:
             print(exc)
+
+
+for file in glob.glob('tests/lambda/*.lambda'):
+    result = subprocess.run(['./pingo', '-translate', file], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+
+    with open(file[:-7] + ".expect", 'r') as stream:
+        if stream.read() == result.stdout.decode("utf-8"):
+            print("ok")
+        else:
+            print("error while executing "+file)
