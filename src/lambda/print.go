@@ -33,3 +33,7 @@ func (e Mult) String() string {
 func (e Div) String() string {
 	return fmt.Sprintf("(%v / %v)", e.L, e.R)
 }
+
+func (e Read) String() string {
+	return fmt.Sprintf("(%v<-%v ; %v)", e.Var, e.Ref, e.Then)
+}

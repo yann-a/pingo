@@ -22,7 +22,10 @@ import (
 
 
 %type <ret> lambda litteral fundefinition application value
-%token FUN ARROW LPAREN RPAREN PLUS MINUS TIMES DIV
+%token FUN LPAREN RPAREN
+%token PLUS MINUS TIMES DIV
+%token GT LT
+%token SEMICOLON
 %token <num> INT
 %token <s> VAR
 
@@ -39,9 +42,10 @@ top: lambda                                        { lambdalex.(*lambdaLex).ret 
 lambda:
     value                                          { $$ = $1                               }
   | FUN VAR fundefinition                          { $$ = Lfun{$2, $3}                     }
+  | VAR LT MINUS VAR SEMICOLON lambda              { $$ = Read{$1, $4, $6}                 }
 
 fundefinition:
-    ARROW lambda                                   { $$ = $2                               }
+    MINUS GT lambda                                { $$ = $3                               }
   | VAR fundefinition                              { $$ = Lfun{$1, $2}                     }
 
 value:
@@ -99,12 +103,13 @@ func (x *lambdaLex) Lex(yylval *lambdaSymType) int {
       case '+':
         return PLUS
       case '-':
-        c = x.getNextRune();
-        if c == '>'{
-          x.next()
-          return ARROW
-        }
         return MINUS
+      case '>':
+        return GT
+      case '<':
+        return LT
+      case ';':
+        return SEMICOLON
       case '*':
         return TIMES
       case '/':

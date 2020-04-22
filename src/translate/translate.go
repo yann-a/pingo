@@ -145,6 +145,15 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			channel1,
 			channel2,
 		)
+	case lambda.Read:
+		return pi.ReceiveThen{
+			string(v.Ref),
+			pi.Variable(v.Var),
+			pi.Parallel{
+				pi.Send{string(v.Ref), pi.Variable(v.Var)},
+				innerTranslate(v.Then, channel),
+			},
+		}
 	default:
 		panic("not supposed to happen")
 	}

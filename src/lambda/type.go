@@ -54,3 +54,11 @@ type Div struct {
 }
 
 func (l Div) isLambda() {}
+
+type Read struct {
+	Var  Lvar
+	Ref  Lvar
+	Then Lambda
+}
+
+func (l Read) isLambda() {}

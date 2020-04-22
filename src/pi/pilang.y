@@ -24,7 +24,7 @@ import (
 
 %type <ret> expr innerexpression chooseExpression receiveThen
 %type <v> pattern value literal arithvalue arith
-%token LPAREN RPAREN DOT PIPE COMMA COLON
+%token LPAREN RPAREN DOT PIPE COMMA SEMICOLON
 %token <num> INT
 %token <s> VAR
 %token OUTPUT PRINT
@@ -39,7 +39,7 @@ import (
 %left CAPTUREPLUS
 
 %left COMMA
-%left COLON
+%left SEMICOLON
 %left PIPE
 
 %nonassoc RPAREN
@@ -75,7 +75,7 @@ innerexpression:
   | receiveThen                                    { $$ = $1                               }
   | OUTPUT VAR value                               { $$ = Send{$2, $3}                     }
   | PRINT value                                    { $$ = Print{$2, Skip(0)}               }
-  | PRINT value COLON innerexpression              { $$ = Print{$2, $4}                    }
+  | PRINT value SEMICOLON innerexpression          { $$ = Print{$2, $4}                    }
   | BRA value EQUAL value KET innerexpression      { $$ = Conditional{$2, true, $4, $6}    }
   | BRA value REPL EQUAL value KET innerexpression { $$ = Conditional{$2, false, $5, $7}   }
 
@@ -152,7 +152,7 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
       case ',':
         return COMMA
       case ';':
-        return COLON
+        return SEMICOLON
       case '^':
         return OUTPUT
       case '+':
