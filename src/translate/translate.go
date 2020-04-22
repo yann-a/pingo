@@ -26,7 +26,20 @@ func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
 		return pi.Send{channel, pi.Variable(v)}
 	case lambda.Lfun:
 		// Une fonction lambda est transformée en un canal qui reçoit des paires (argument, canal de retour)
-		return pi.Privatize{"y", pi.Parallel{pi.Send{channel, pi.Variable("y")}, pi.Repl{"y", pi.Pair{pi.Variable(v.Arg), pi.Variable("q")}, Translate(v.Exp, "q")}}}
+		return pi.Privatize{
+			"y",
+			pi.Parallel{
+				pi.Send{
+					channel,
+					pi.Variable("y"),
+				},
+				pi.Repl{
+					"y",
+					pi.Pair{pi.Variable(v.Arg), pi.Variable("q")},
+					Translate(v.Exp, "q"),
+				},
+			},
+		}
 	case lambda.Lapp:
 		return pi.Privatize{channel1, pi.Parallel{Translate(v.Exp, channel1), pi.ReceiveThen{channel1, pi.Variable("v"), pi.Privatize{channel2, pi.Parallel{Translate(v.Fun, channel2), pi.ReceiveThen{channel2, pi.Variable("f"), pi.Send{"f", pi.Pair{pi.Variable("v"), pi.Variable(channel)}}}}}}}}
 	case lambda.Add:
