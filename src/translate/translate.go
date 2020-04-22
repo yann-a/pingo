@@ -6,6 +6,20 @@ import (
 )
 
 func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
+	translation := innerTranslate(lexpr, channel)
+
+	// On définit print comme une fonction lambda usuelle
+	return pi.Parallel{
+		translation,
+		pi.Repl{
+			"print",
+			pi.Pair{pi.Variable("x"), pi.Variable("q")},
+			pi.Print{pi.Variable("x"), pi.Send{"q", pi.Variable("x")}},
+		},
+	}
+}
+
+func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 	// on détermine des noms frais pour les translate récursifs
 	var channel1, channel2 string
 	if channel == "q" {
@@ -36,7 +50,7 @@ func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
 				pi.Repl{
 					"y",
 					pi.Pair{pi.Variable(v.Arg), pi.Variable("q")},
-					Translate(v.Exp, "q"),
+					innerTranslate(v.Exp, "q"),
 				},
 			},
 		}
@@ -95,21 +109,6 @@ func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
 			channel1,
 			channel2,
 		)
-	case lambda.Print:
-		return pi.Privatize{
-			channel1,
-			pi.Parallel{
-				Translate(v.L, channel1),
-				pi.ReceiveThen{
-					channel1,
-					pi.Variable("result"),
-					pi.Print{
-						pi.Variable("result"),
-						pi.Send{channel, pi.Variable("result")},
-					},
-				},
-			},
-		}
 	default:
 		panic("not supposed to happen")
 	}
@@ -119,14 +118,14 @@ func translateArith(L, R lambda.Lambda, sendExpr pi.Expr, channel1, channel2 str
 	return pi.Privatize{
 		channel2,
 		pi.Parallel{
-			Translate(R, channel2),
+			innerTranslate(R, channel2),
 			pi.ReceiveThen{
 				channel2,
 				pi.Variable("rresult"),
 				pi.Privatize{
 					channel1,
 					pi.Parallel{
-						Translate(R, channel1),
+						innerTranslate(L, channel1),
 						pi.ReceiveThen{
 							channel1,
 							pi.Variable("lresult"),

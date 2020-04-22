@@ -24,11 +24,15 @@ func (e ReceiveThen) String() string {
 }
 
 func (e Privatize) String() string {
-	return fmt.Sprintf("((%v).%v)", e.Channel, e.Then)
+	return fmt.Sprintf("((%v)%v)", e.Channel, e.Then)
 }
 
 func (e Print) String() string {
 	return fmt.Sprintf("(print %v; %v)", e.V, e.Then)
+}
+
+func (e Pair) String() string {
+	return fmt.Sprintf("(%v, %v)", e.V1, e.V2)
 }
 
 func (e Skip) String() string {

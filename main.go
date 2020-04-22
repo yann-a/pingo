@@ -55,7 +55,7 @@ func Parse(in *bufio.Reader, translateInput, showSrc bool) (ret pi.Expr) {
 			fmt.Println(lambdaCode)
 		}
 		t := translate.Translate(lambdaCode, "p")
-		ret = pi.Parallel{t, pi.ReceiveThen{"p", pi.Variable("x"), pi.Print{pi.Variable("x"), pi.Skip(0)}}}
+		ret = pi.Parallel{t, pi.ReceiveThen{"p", pi.Variable("x"), pi.Skip(0)}}
 	} else {
 		ret = pi.Parse(in)
 		if showSrc {

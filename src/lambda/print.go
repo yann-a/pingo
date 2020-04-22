@@ -33,7 +33,3 @@ func (e Mult) String() string {
 func (e Div) String() string {
 	return fmt.Sprintf("(%v / %v)", e.L, e.R)
 }
-
-func (e Print) String() string {
-	return fmt.Sprintf("print (%v)", e.L)
-}

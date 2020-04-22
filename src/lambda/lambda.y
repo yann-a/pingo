@@ -22,7 +22,7 @@ import (
 
 
 %type <ret> lambda litteral fundefinition application value
-%token PRINT FUN ARROW LPAREN RPAREN PLUS MINUS TIMES DIV
+%token FUN ARROW LPAREN RPAREN PLUS MINUS TIMES DIV
 %token <num> INT
 %token <s> VAR
 
@@ -53,7 +53,6 @@ value:
 
 application:
     litteral                                       { $$ = $1                               }
-  | PRINT litteral                                 { $$ = Print{$2}                        }
   | application litteral                           { $$ = Lapp{$1, $2}                     }
 
 litteral:
@@ -187,7 +186,6 @@ func (x *lambdaLex) string(c rune, yylval *lambdaSymType) int {
   yylval.s = Lvar(b.String())
 
   if b.String() == "fun" { return FUN }
-  if b.String() == "print" { return PRINT }
 
   return VAR
 }
