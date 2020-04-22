@@ -1,0 +1,3 @@
+sequential:
+  - 100000
+  - select: [ 5, 10 ]

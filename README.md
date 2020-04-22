@@ -47,6 +47,18 @@ For lambda-calculus:
 + `fun x -> l` : the function that associates l to the variable x
 + `m n` : apply the function m to argument n
 
+## Running the tests
+
+Pyyaml is required:
+```
+pip3 install pyyaml
+```
+
+Then run:
+```
+make tests
+```
+
 ## Features
 The available options are :
 + `-showsrc` to show the parsed input
