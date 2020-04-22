@@ -17,3 +17,19 @@ func (e Lfun) String() string {
 func (e Lapp) String() string {
 	return fmt.Sprintf("(%v %v)", e.Fun, e.Exp)
 }
+
+func (e Add) String() string {
+	return fmt.Sprintf("(%v + %v)", e.L, e.R)
+}
+
+func (e Sub) String() string {
+	return fmt.Sprintf("(%v - %v)", e.L, e.R)
+}
+
+func (e Mult) String() string {
+	return fmt.Sprintf("(%v * %v)", e.L, e.R)
+}
+
+func (e Div) String() string {
+	return fmt.Sprintf("(%v / %v)", e.L, e.R)
+}

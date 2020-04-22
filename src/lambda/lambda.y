@@ -21,11 +21,15 @@ import (
 }
 
 
-%type <ret> lambda litteral fundefinition application
-%token FUN ARROW LPAREN RPAREN
+%type <ret> lambda litteral fundefinition application value
+%token FUN ARROW LPAREN RPAREN PLUS MINUS TIMES DIV
 %token <num> INT
 %token <s> VAR
 
+%left PLUS
+%left MINUS
+%left TIMES
+%left DIV
 
 /*********** Parser ***********/
 %%
@@ -33,12 +37,19 @@ import (
 top: lambda                                        { lambdalex.(*lambdaLex).ret = $1       }
 
 lambda:
-    application                                    { $$ = $1                               }
+    value                                          { $$ = $1                               }
   | FUN VAR fundefinition                          { $$ = Lfun{$2, $3}                     }
 
 fundefinition:
     ARROW lambda                                   { $$ = $2                               }
   | VAR fundefinition                              { $$ = Lfun{$1, $2}                     }
+
+value:
+    application                                    { $$ = $1                               }
+  | value PLUS value                               { $$ = Add{$1, $3}                      }
+  | value MINUS value                              { $$ = Sub{$1, $3}                      }
+  | value TIMES value                              { $$ = Mult{$1, $3}                     }
+  | value DIV value                                { $$ = Div{$1, $3}                      }
 
 application:
     litteral                                       { $$ = $1                               }
@@ -85,13 +96,19 @@ func (x *lambdaLex) Lex(yylval *lambdaSymType) int {
         return LPAREN
       case ')':
         return RPAREN
+      case '+':
+        return PLUS
       case '-':
         c = x.getNextRune();
         if c == '>'{
           x.next()
           return ARROW
         }
-        // return MINUS
+        return MINUS
+      case '*':
+        return TIMES
+      case '/':
+        return DIV
       case ' ', '\t', '\n', '\r':
       default:
         if unicode.IsLetter(c) {

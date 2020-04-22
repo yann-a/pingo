@@ -26,3 +26,31 @@ type Lapp struct {
 }
 
 func (l Lapp) isLambda() {}
+
+type Add struct {
+	L Lambda
+	R Lambda
+}
+
+func (l Add) isLambda() {}
+
+type Sub struct {
+	L Lambda
+	R Lambda
+}
+
+func (l Sub) isLambda() {}
+
+type Mult struct {
+	L Lambda
+	R Lambda
+}
+
+func (l Mult) isLambda() {}
+
+type Div struct {
+	L Lambda
+	R Lambda
+}
+
+func (l Div) isLambda() {}
