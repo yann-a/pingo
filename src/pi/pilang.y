@@ -105,12 +105,9 @@ arith:
   | arith TIMES arith                              { $$ = Mul{$1, $3}                      }
   | arith DIV arith                                { $$ = Div{$1, $3}                      }
 
-
 literal:
     INT                                            { $$ = Constant($1)                     }
   | VAR                                            { $$ = Variable($1)                     }
-
-
 
 
 /**********     Lexer     ***********/
