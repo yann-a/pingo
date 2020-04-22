@@ -6,15 +6,51 @@ import (
 )
 
 func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
-	translation := innerTranslate(lexpr, channel)
+	freechannel := "q"
+	if channel == "q" {
+		freechannel = "r"
+	}
 
-	// On définit print comme une fonction lambda usuelle
+	translation := innerTranslate(lexpr, freechannel)
+
 	return pi.Parallel{
 		translation,
-		pi.Repl{
+
+		pi.Repl{ // On définit print comme une fonction lambda usuelle
 			"print",
 			pi.Pair{pi.Variable("x"), pi.Variable("q")},
 			pi.Print{pi.Variable("x"), pi.Send{"q", pi.Variable("x")}},
+		},
+
+		pi.Repl{ // On définit ref
+			"ref",
+			pi.Pair{pi.Variable("x"), pi.Variable("q")},
+			pi.Privatize{
+				"a",
+				pi.Parallel{
+					pi.Send{"a", pi.Variable("x")},
+					pi.Send{"refCleaner", pi.Variable("a")},
+					pi.Send{"q", pi.Variable("a")},
+				},
+			},
+		},
+
+		// On rajoute un cleaner pour nettoyer les réfs après leur création
+		pi.ReceiveThen{
+			freechannel,
+			pi.Variable("ret"),
+			pi.Parallel{
+				pi.Repl{
+					"refCleaner",
+					pi.Variable("a"),
+					pi.ReceiveThen{
+						"a",
+						pi.Variable("x"),
+						pi.Skip(0),
+					},
+				},
+				pi.Send{channel, pi.Variable("ret")},
+			},
 		},
 	}
 }
