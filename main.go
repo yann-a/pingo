@@ -22,7 +22,10 @@ func main() {
 	flag.Parse()
 
 	// Parsing
-	in := getBuffer()
+	buffer := getBuffer()
+	defer buffer.Close() // We make sure to close the buffer at the end
+
+	in := bufio.NewReader(buffer)
 	ret := Parse(in, *translateInput, *showSrc)
 
 	if ret == nil {
@@ -63,7 +66,7 @@ func Parse(in *bufio.Reader, translateInput, showSrc bool) (ret pi.Expr) {
 }
 
 // returns the right buffer according to options
-func getBuffer() *bufio.Reader {
+func getBuffer() *os.File {
 	nonFlagArgs := flag.Args()
 	buffer := os.Stdin
 
@@ -73,10 +76,9 @@ func getBuffer() *bufio.Reader {
 		if err != nil {
 			fmt.Printf("Couldn't read from %s (%s). Reading from stdin\n", nonFlagArgs[0], err)
 		} else {
-			defer file.Close()
 			buffer = file
 		}
 	}
 
-	return bufio.NewReader(buffer)
+	return buffer
 }
