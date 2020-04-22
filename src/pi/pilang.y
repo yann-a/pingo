@@ -3,7 +3,7 @@
 package pi
 
 import (
-	"bufio"
+  "bufio"
   "bytes"
   "log"
   "unicode" // To tell apart letters from numbers
