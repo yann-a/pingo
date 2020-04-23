@@ -25,7 +25,7 @@ import (
 %token FUN LPAREN RPAREN
 %token PLUS MINUS TIMES DIV
 %token GT LT
-%token SEMICOLON
+%token SEMICOLON COLON EQUAL
 %token <num> INT
 %token <s> VAR
 
@@ -43,6 +43,8 @@ lambda:
     value                                          { $$ = $1                               }
   | FUN VAR fundefinition                          { $$ = Lfun{$2, $3}                     }
   | VAR LT MINUS VAR SEMICOLON lambda              { $$ = Read{$1, $4, $6}                 }
+  | VAR COLON EQUAL litteral SEMICOLON lambda      { $$ = Write{$1, $4, $6}                }
+  | VAR LT MINUS VAR COLON EQUAL litteral SEMICOLON lambda { $$ = Swap{$1, $4, $7, $9}     }
 
 fundefinition:
     MINUS GT lambda                                { $$ = $3                               }
@@ -110,6 +112,10 @@ func (x *lambdaLex) Lex(yylval *lambdaSymType) int {
         return LT
       case ';':
         return SEMICOLON
+      case ':':
+        return COLON
+      case '=':
+        return EQUAL
       case '*':
         return TIMES
       case '/':

@@ -37,3 +37,11 @@ func (e Div) String() string {
 func (e Read) String() string {
 	return fmt.Sprintf("(%v<-%v ; %v)", e.Var, e.Ref, e.Then)
 }
+
+func (e Write) String() string {
+	return fmt.Sprintf("(%v:=%v ; %v)", e.Ref, e.Val, e.Then)
+}
+
+func (e Swap) String() string {
+	return fmt.Sprintf("(%v<-%v:=%v ; %v", e.Var, e.Ref, e.Val, e.Then)
+}

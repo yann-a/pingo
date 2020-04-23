@@ -62,3 +62,20 @@ type Read struct {
 }
 
 func (l Read) isLambda() {}
+
+type Write struct {
+	Ref  Lvar
+	Val  Lambda
+	Then Lambda
+}
+
+func (l Write) isLambda() {}
+
+type Swap struct {
+	Var  Lvar
+	Ref  Lvar
+	Val  Lambda
+	Then Lambda
+}
+
+func (l Swap) isLambda() {}
