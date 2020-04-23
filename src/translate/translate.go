@@ -146,49 +146,11 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			channel2,
 		)
 	case lambda.Read:
-		return pi.ReceiveThen{
-			string(v.Ref),
-			pi.Variable(v.Var),
-			pi.Parallel{
-				pi.Send{string(v.Ref), pi.Variable(v.Var)},
-				innerTranslate(v.Then, channel),
-			},
-		}
-	// Since a write is basically a swap where we trash the received value, we could
-	// try to factor the two cases but i didn't managed to do it for now
-	// (If we do succeed it's probably possible to factor read too)
+		return translatePrimitives(string(v.Var), string(v.Ref), v.Var, v.Then, channel, channel1)
 	case lambda.Write:
-		return pi.Privatize{
-			channel1,
-			pi.ReceiveThen{
-				string(v.Ref),
-				pi.Variable("trash"),
-				pi.Parallel{
-					innerTranslate(v.Val, channel1),
-					pi.ReceiveThen{
-						channel1,
-						pi.Variable("retrans"),
-						pi.Send{string(v.Ref), pi.Variable("retrans")},
-					},
-				},
-			},
-		}
+		return translatePrimitives("trash", string(v.Ref), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
-		return pi.Privatize{
-			channel1,
-			pi.ReceiveThen{
-				string(v.Ref),
-				pi.Variable(v.Var),
-				pi.Parallel{
-					innerTranslate(v.Val, channel1),
-					pi.ReceiveThen{
-						channel1,
-						pi.Variable("retrans"),
-						pi.Send{string(v.Ref), pi.Variable("retrans")},
-					},
-				},
-			},
-		}
+		return translatePrimitives(string(v.Var), string(v.Ref), v.Val, v.Then, channel, channel1)
 	default:
 		panic("not supposed to happen")
 	}
@@ -216,4 +178,27 @@ func translateArith(L, R lambda.Lambda, sendExpr pi.Expr, channel1, channel2 str
 			},
 		},
 	}
+}
+
+// This is basically a swap, and we us it for every primitive:
+// * A read is a swap of a variable with itself
+// * A write is a swap where we trash the received value
+// * A swap is... well, a swap
+func translatePrimitives(variable, ref string, value, then lambda.Lambda, channel, channel1 string) pi.Expr {
+	return pi.Privatize{
+			channel1,
+			pi.ReceiveThen{
+				ref,
+				pi.Variable(variable),
+				pi.Parallel{
+					innerTranslate(value, channel1),
+					pi.ReceiveThen{
+						channel1,
+						pi.Variable("retrans"),
+						pi.Send{ref, pi.Variable("retrans")},
+					},
+					innerTranslate(then, channel),
+				},
+			},
+		}
 }
