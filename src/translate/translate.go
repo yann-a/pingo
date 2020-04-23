@@ -192,21 +192,21 @@ func translateArith(L, R lambda.Lambda, sendExpr pi.Expr, channel1, channel2 str
 // * A swap is... well, a swap
 func translatePrimitives(variable, ref string, value, then lambda.Lambda, channel, channel1 string) pi.Expr {
 	return pi.Privatize{
-			channel1,
-			pi.Parallel{
-				innerTranslate(value, channel1),
-				pi.ReceiveThen{
-					ref,
-					pi.Variable(variable),
-					pi.Parallel{
-						pi.ReceiveThen{
-							channel1,
-							pi.Variable("retrans"),
-							pi.Send{ref, pi.Variable("retrans")},
-						},
-						innerTranslate(then, channel),
+		channel1,
+		pi.Parallel{
+			innerTranslate(value, channel1),
+			pi.ReceiveThen{
+				ref,
+				pi.Variable(variable),
+				pi.Parallel{
+					pi.ReceiveThen{
+						channel1,
+						pi.Variable("retrans"),
+						pi.Send{ref, pi.Variable("retrans")},
 					},
+					innerTranslate(then, channel),
 				},
 			},
-		}
+		},
+	}
 }

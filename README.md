@@ -43,9 +43,13 @@ For pi-calculus:
 + `[x=y]P` or `[x!=y]P` : run P if the condition between brackets is met
 + `a(x).P + b(x).Q` : non-deterministic choice : we go on with P if we read from `a` first, or Q if we read from `b`
 
-For lambda-calculus:
+For lambda-calculus+ref:
 + `fun x -> l` : the function that associates l to the variable x
 + `m n` : apply the function m to argument n
++ `ref v` : a reference that is initialized containing v
++ `x <- a` (read): assign the value contained in reference a to x
++ `a := x` (write): assign the value x to ref a
++ `x <- a := v` (swap): evaluate v, assign the value contained in a to x and replace it by v
 
 ## Running the tests
 
