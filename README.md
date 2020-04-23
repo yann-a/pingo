@@ -3,11 +3,6 @@ A pi-calculus interpreter written in Go
 
 <img src="media/pingo.png" align="right" alt="pingo" width="250"/>
 
-## Temporary warning ##
-Currently, the translation from lambda to pi is then passed to the `print` function from pi-calculus.
-Hence it might fail if the code returns something else than an int.
-This will change in the near future when lambda will embed the print function
-
 ## Requirements
 To compile, **your Go version must be greater than 1.14**.
 To verify that, type `go version`
