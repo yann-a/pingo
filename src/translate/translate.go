@@ -155,15 +155,18 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			},
 		}
 	case lambda.Write:
-		return pi.ReceiveThen{
-			string(v.Ref),
-			pi.Variable("trash"),
-			pi.Parallel{
-				innerTranslate(v.Val, channel1),
-				pi.ReceiveThen{
-					channel1,
-					pi.Variable("retrans"),
-					pi.Send{string(v.Ref), pi.Variable("retrans")},
+		return pi.Privatize{
+			channel1,
+			pi.ReceiveThen{
+				string(v.Ref),
+				pi.Variable("trash"),
+				pi.Parallel{
+					innerTranslate(v.Val, channel1),
+					pi.ReceiveThen{
+						channel1,
+						pi.Variable("retrans"),
+						pi.Send{string(v.Ref), pi.Variable("retrans")},
+					},
 				},
 			},
 		}
