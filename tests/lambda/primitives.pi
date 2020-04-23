@@ -1,0 +1,1 @@
+(fun a b -> x<-a; a:=6; x<-b:=7; y<-b; z<-a; print(x+y+z)) (ref 5) (ref 12)
