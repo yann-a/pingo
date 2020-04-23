@@ -18,7 +18,7 @@ func main() {
 	// The options of the executable
 	showSrc := flag.Bool("showsrc", false, "Output the parsed code")
 	outCode := flag.Bool("outcode", false, "Output the code before executing it (after translation if any")
-	translateInput := flag.Bool("translate", false, "Parse input as lambda, translate in pi and execute")
+	translateInput := flag.Bool("lambda", false, "Parse input as lambda, translate in pi and execute")
 	flag.Parse()
 
 	// Parsing

@@ -67,6 +67,6 @@ make tests
 The available options are :
 + `-showsrc` to show the parsed input
 + `-outcode` to show the code that's going to be executed (different from showsrc only of a translation happened)
-+ `-translation` to parse lambda-calculus code and translate it into pi-calculus before execution
++ `-lambda` to parse lambda-calculus code and translate it into pi-calculus before execution
 
 The executable reads from a file if provided, or stdin if none was provided or reading from the file failed, until EOF (or Ctrl+D in command line) is met

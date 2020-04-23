@@ -63,7 +63,7 @@ for file in glob.glob('tests/pi/*.pi'):
 
 
 for file in glob.glob('tests/lambda/*.lambda'):
-    result = subprocess.run(['./pingo', '-translate', file], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    result = subprocess.run(['./pingo', '-lambda', file], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     with open(file[:-7] + ".expect", 'r') as stream:
         if stream.read() == result.stdout.decode("utf-8"):
