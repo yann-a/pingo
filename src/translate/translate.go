@@ -146,7 +146,14 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			channel2,
 		)
 	case lambda.Read:
-		return translatePrimitives(string(v.Var), string(v.Ref), v.Var, v.Then, channel, channel1)
+		return pi.ReceiveThen{
+			string(v.Ref),
+			pi.Variable(v.Var),
+			pi.Parallel{
+				pi.Send{string(v.Ref), pi.Variable(v.Var)},
+				innerTranslate(v.Then, channel),
+			},
+		}
 	case lambda.Write:
 		return translatePrimitives("trash", string(v.Ref), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
@@ -180,24 +187,25 @@ func translateArith(L, R lambda.Lambda, sendExpr pi.Expr, channel1, channel2 str
 	}
 }
 
-// This is basically a swap, and we us it for every primitive:
-// * A read is a swap of a variable with itself
+// This is basically a swap, and we us it for swap and write:
 // * A write is a swap where we trash the received value
 // * A swap is... well, a swap
 func translatePrimitives(variable, ref string, value, then lambda.Lambda, channel, channel1 string) pi.Expr {
 	return pi.Privatize{
 			channel1,
-			pi.ReceiveThen{
-				ref,
-				pi.Variable(variable),
-				pi.Parallel{
-					innerTranslate(value, channel1),
-					pi.ReceiveThen{
-						channel1,
-						pi.Variable("retrans"),
-						pi.Send{ref, pi.Variable("retrans")},
+			pi.Parallel{
+				innerTranslate(value, channel1),
+				pi.ReceiveThen{
+					ref,
+					pi.Variable(variable),
+					pi.Parallel{
+						pi.ReceiveThen{
+							channel1,
+							pi.Variable("retrans"),
+							pi.Send{ref, pi.Variable("retrans")},
+						},
+						innerTranslate(then, channel),
 					},
-					innerTranslate(then, channel),
 				},
 			},
 		}
