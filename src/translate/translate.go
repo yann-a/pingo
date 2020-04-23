@@ -154,12 +154,31 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 				innerTranslate(v.Then, channel),
 			},
 		}
+	// Since a write is basically a swap where we trash the received value, we could
+	// try to factor the two cases but i didn't managed to do it for now
+	// (If we do succeed it's probably possible to factor read too)
 	case lambda.Write:
 		return pi.Privatize{
 			channel1,
 			pi.ReceiveThen{
 				string(v.Ref),
 				pi.Variable("trash"),
+				pi.Parallel{
+					innerTranslate(v.Val, channel1),
+					pi.ReceiveThen{
+						channel1,
+						pi.Variable("retrans"),
+						pi.Send{string(v.Ref), pi.Variable("retrans")},
+					},
+				},
+			},
+		}
+	case lambda.Swap:
+		return pi.Privatize{
+			channel1,
+			pi.ReceiveThen{
+				string(v.Ref),
+				pi.Variable(v.Var),
 				pi.Parallel{
 					innerTranslate(v.Val, channel1),
 					pi.ReceiveThen{
