@@ -1,0 +1,1 @@
+(fun a b -> x<-b; x<-a:=x; y<-a; (fun x y -> 0) (print x) (print y)) (ref 5) (ref 12)
