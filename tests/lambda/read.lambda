@@ -1,0 +1,1 @@
+new a = 5 in new b = 12 in y<-a; z<-b; w<-a; print ((y+z)*w)

@@ -1,0 +1,1 @@
+new a = 5 in new b = 12 in x<-a; a:=6; x<-b:=7; y<-b; z<-a; print(x+y+z)
