@@ -1,0 +1,6 @@
+!fibo(x, continuation). (
+  [x=0] ^continuation 0 |
+  [x=1] ^continuation 1 |
+  [x!=0][x!=1] (r1)(r2) (^fibo(x-2, r1) | ^fibo(x-1, r2) | r1(v1).r2(v2).^continuation (v1+v2) )
+) |
+(q) (^fibo(10, q) | q(ret).print ret)

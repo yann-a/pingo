@@ -236,6 +236,8 @@ func (x *exprLex) string(c rune, yylval *exprSymType) int {
     switch {
       case unicode.IsLetter(c):
         add(&b, c)
+      case unicode.IsDigit(c):
+        add(&b, c)
       default:
         if c != eof {
           x.reader.UnreadRune()
