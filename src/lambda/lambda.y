@@ -22,6 +22,7 @@ import (
 
 
 %type <ret> lambda litteral fundefinition application value
+%token NEW IN
 %token FUN LPAREN RPAREN
 %token PLUS MINUS TIMES DIV
 %token GT LT
@@ -41,6 +42,7 @@ top: lambda                                        { lambdalex.(*lambdaLex).ret 
 
 lambda:
     value                                          { $$ = $1                               }
+  | NEW VAR EQUAL lambda IN lambda                 { $$ = New{$2, $4, $6}                  }
   | FUN VAR fundefinition                          { $$ = Lfun{$2, $3}                     }
   | VAR LT MINUS VAR SEMICOLON lambda              { $$ = Read{$1, $4, $6}                 }
   | VAR COLON EQUAL litteral SEMICOLON lambda      { $$ = Write{$1, $4, $6}                }
@@ -197,6 +199,8 @@ func (x *lambdaLex) string(c rune, yylval *lambdaSymType) int {
   yylval.s = Lvar(b.String())
 
   if b.String() == "fun" { return FUN }
+  if b.String() == "new" { return NEW }
+  if b.String() == "in" { return IN }
 
   return VAR
 }

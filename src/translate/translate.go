@@ -22,19 +22,6 @@ func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
 			pi.Print{pi.Variable("x"), pi.Send{"q", pi.Variable("x")}},
 		},
 
-		pi.Repl{ // On définit ref
-			"ref",
-			pi.Pair{pi.Variable("x"), pi.Variable("q")},
-			pi.Privatize{
-				"a",
-				pi.Parallel{
-					pi.Send{"a", pi.Variable("x")},
-					pi.Send{"refCleaner", pi.Variable("a")},
-					pi.Send{"q", pi.Variable("a")},
-				},
-			},
-		},
-
 		// On rajoute un cleaner pour nettoyer les réfs après leur création
 		pi.ReceiveThen{
 			freechannel,
@@ -168,6 +155,36 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 		return translatePrimitives("trash", string(v.Ref), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
 		return translatePrimitives(string(v.Var), string(v.Ref), v.Val, v.Then, channel, channel1)
+	case lambda.New:
+		var t pi.Terminal = translateLambdaTerminal(v.Value)
+		if t == nil { // Si l'expression écrit n'est pas simple
+			t = pi.Variable("value")
+		}
+
+		finalExpr := pi.Privatize{ // On réserve la variable de la future réf
+			string(v.Var),
+			pi.Parallel{
+				pi.Send{"refCleaner", pi.Variable(v.Var)},
+				pi.Send{string(v.Var), t}, // émission de la valeur sur le canal de la réf
+				innerTranslate(v.Then, channel),
+			},
+		}
+
+		if t == nil {
+			finalExpr = pi.Privatize{ // On privatise un canal pour attendre la réception de la valeur écrite
+				channel1,
+				pi.Parallel{
+					innerTranslate(v.Value, channel1),
+					pi.ReceiveThen{
+						channel1,
+						pi.Variable("value"),
+						finalExpr,
+					},
+				},
+			}
+		}
+
+		return finalExpr
 	default:
 		panic("not supposed to happen")
 	}

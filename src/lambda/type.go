@@ -79,3 +79,12 @@ type Swap struct {
 }
 
 func (l Swap) isLambda() {}
+
+// Permet d'instancier une réf
+type New struct {
+	Var Lvar
+	Value Lambda
+	Then Lambda
+}
+
+func (l New) isLambda() {}

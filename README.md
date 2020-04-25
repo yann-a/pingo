@@ -41,7 +41,7 @@ For pi-calculus:
 For lambda-calculus+ref:
 + `fun x -> l` : the function that associates l to the variable x
 + `m n` : apply the function m to argument n
-+ `ref v` : a reference that is initialized containing v
++ `new r = v in l` : initialize r to a reference containing v, and then execute l
 + `x <- a` (read): assign the value contained in reference a to x
 + `a := x` (write): assign the value x to ref a
 + `x <- a := v` (swap): evaluate v, assign the value contained in a to x and replace it by v
