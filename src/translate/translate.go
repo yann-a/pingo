@@ -259,13 +259,13 @@ func translatePrimitives(variable, ref string, value, then lambda.Lambda, channe
 			pi.ReceiveThen{
 				ref,
 				pi.Variable(variable),
-				pi.Parallel{
-					pi.ReceiveThen{
-						channel1,
-						pi.Variable("retrans"),
+				pi.ReceiveThen{
+					channel1,
+					pi.Variable("retrans"),
+					pi.Parallel{
 						pi.Send{ref, pi.Variable("retrans")},
+						innerTranslate(then, channel),
 					},
-					innerTranslate(then, channel),
 				},
 			},
 		},
