@@ -35,6 +35,22 @@ func (e Pair) String() string {
 	return fmt.Sprintf("(%v, %v)", e.V1, e.V2)
 }
 
+func (e Add) String() string {
+	return fmt.Sprintf("(%v + %v)", e.V1, e.V2)
+}
+
+func (e Sub) String() string {
+	return fmt.Sprintf("(%v - %v)", e.V1, e.V2)
+}
+
+func (e Mul) String() string {
+	return fmt.Sprintf("(%v * %v)", e.V1, e.V2)
+}
+
+func (e Div) String() string {
+	return fmt.Sprintf("(%v / %v)", e.V1, e.V2)
+}
+
 func (e Skip) String() string {
 	return "skip"
 }
