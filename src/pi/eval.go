@@ -10,8 +10,6 @@ func Launch(e Expr, wg *sync.WaitGroup) {
 }
 
 func eval(e Expr, envir *env, wg *sync.WaitGroup) {
-	defer wg.Done() // We make sure we mark the process as finished at the end
-
 	switch v := e.(type) { // We do some kind of pattern matching on the expression
 	case Parallel:
 		for _, task := range v {
@@ -20,10 +18,12 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 			go eval(task, envir, wg)
 		}
 
+		wg.Done()
+
 	case Send:
 		val := interpretTerminal(v.Value, envir)
 
-		wg.Add(1) // We increment the counter to take into account the goroutine that will receive this message
+		// we don't call wg.Done() to take into account the goroutine that will receive this message
 		channel := envir.get_value(Variable(v.Channel)).(Channel)
 		channel <- val
 
@@ -36,13 +36,11 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		envir = envir.set_from_pattern(v.Pattern, message)
 
 		eval(v.Then, envir, wg)
-		wg.Add(1)
 
 	case Privatize:
 		envir2 := envir.set_value(Variable(v.Channel), make(Channel))
 
 		eval(v.Then, envir2, wg)
-		wg.Add(1)
 
 	case Print:
 		ret := interpretTerminal(v.V, envir)
@@ -52,10 +50,9 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		fmt.Printf("%d\n", int(integer))
 
 		eval(v.Then, envir, wg)
-		wg.Add(1)
 
 	case Skip:
-		// nothing to do here
+		wg.Done() // nothing to do here
 
 	case Choose:
 		channel1 := envir.get_value(Variable(v.E.Channel)).(Channel)
@@ -66,12 +63,10 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		case val := <-channel1:
 			envir = envir.set_from_pattern(v.E.Pattern, val)
 			eval(v.E.Then, envir, wg)
-			wg.Add(1)
 
 		case val := <-channel2:
 			envir = envir.set_from_pattern(v.F.Pattern, val)
 			eval(v.F.Then, envir, wg)
-			wg.Add(1)
 		}
 
 	case Conditional:
@@ -80,7 +75,6 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 
 		if v.Eq == (val_l == val_r) {
 			eval(v.Then, envir, wg)
-			wg.Add(1)
 		}
 
 	case Repl:
@@ -92,11 +86,11 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 
 		wg.Add(1)
 		go eval(v.Then, subenvir, wg)
+
 		eval(v, envir, wg)
-		wg.Add(1)
 
 	default:
-		fmt.Printf("unrecognised type %T (%v)\n", v, v)
+		panic(fmt.Sprintf("unrecognised type %T (%v)\n", v, v))
 	}
 }
 
