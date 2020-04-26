@@ -1,7 +1,8 @@
 nbgroups = 0
 
 """
-Transforme un fichier de règles en une regex pas jolie jolie.
+Transforme un fichier de règles en une regex.
+Contraintes sur la règle `parallel` : ne doit contenir que des entiers, et des entiers distincts.
 """
 def compile(rule):
     global nbgroups
