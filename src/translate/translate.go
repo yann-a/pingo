@@ -5,11 +5,8 @@ import (
 	"pingo/src/pi"
 )
 
-func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
-	freechannel := "q"
-	if channel == "q" {
-		freechannel = "r"
-	}
+func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
+	freechannel := (channel + 1) % 2
 
 	translation := innerTranslate(lexpr, freechannel)
 
@@ -24,7 +21,7 @@ func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
 
 		// On rajoute un cleaner pour nettoyer les réfs après leur création
 		pi.ReceiveThen{
-			freechannel,
+			chanName(freechannel),
 			pi.Variable("ret"),
 			pi.Parallel{
 				pi.Repl{
@@ -36,44 +33,39 @@ func Translate(lexpr lambda.Lambda, channel string) pi.Expr {
 						pi.Skip(0),
 					},
 				},
-				pi.Send{channel, pi.Variable("ret")},
+				pi.Send{chanName(channel), pi.Variable("ret")},
 			},
 		},
 	}
 }
 
-func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
+func chanName(channel int) string {
+	return "chan" + string(channel)
+}
+
+func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 	// on détermine des noms frais pour les translate récursifs
-	var channel1, channel2 string
-	if channel == "q" {
-		channel1 = "r"
-		channel2 = "s"
-	} else if channel == "r" {
-		channel1 = "q"
-		channel2 = "s"
-	} else {
-		channel1 = "q"
-		channel2 = "r"
-	}
+	channel1 := (channel + 1) % 3
+	channel2 := (channel + 2) % 3
 
 	switch v := lexpr.(type) {
 	case lambda.Lconst:
-		return pi.Send{channel, pi.Constant(v)}
+		return pi.Send{chanName(channel), pi.Constant(v)}
 	case lambda.Lvar:
-		return pi.Send{channel, pi.Variable(v)}
+		return pi.Send{chanName(channel), pi.Variable(v)}
 	case lambda.Lfun:
 		// Une fonction lambda est transformée en un canal qui reçoit des paires (argument, canal de retour)
 		return pi.Privatize{
 			"y",
 			pi.Parallel{
 				pi.Send{
-					channel,
+					chanName(channel),
 					pi.Variable("y"),
 				},
 				pi.Repl{
 					"y",
-					pi.Pair{pi.Variable(v.Arg), pi.Variable("q")},
-					innerTranslate(v.Exp, "q"),
+					pi.Pair{pi.Variable(v.Arg), pi.Variable(chanName(0))},
+					innerTranslate(v.Exp, 0),
 				},
 			},
 		}
@@ -84,7 +76,7 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			func (L, R pi.Terminal) pi.Expr {
 				return pi.Send{
 					string(L.(pi.Variable)),
-					pi.Pair{R, pi.Variable(channel)},
+					pi.Pair{R, pi.Variable(chanName(channel))},
 				}
 			},
 			channel1,
@@ -96,7 +88,7 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			v.R,
 			func (L, R pi.Terminal) pi.Expr {
 				return pi.Send{
-					channel,
+					chanName(channel),
 					pi.Add{L, R},
 				}
 			},
@@ -109,7 +101,7 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			v.R,
 			func (L, R pi.Terminal) pi.Expr {
 				return pi.Send{
-					channel,
+					chanName(channel),
 					pi.Sub{L, R},
 				}
 			},
@@ -122,7 +114,7 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			v.R,
 			func (L, R pi.Terminal) pi.Expr {
 				return pi.Send{
-					channel,
+					chanName(channel),
 					pi.Mul{L, R},
 				}
 			},
@@ -135,7 +127,7 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 			v.R,
 			func (L, R pi.Terminal) pi.Expr {
 				return pi.Send{
-					channel,
+					chanName(channel),
 					pi.Div{L, R},
 				}
 			},
@@ -172,11 +164,11 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 
 		if t == nil {
 			finalExpr = pi.Privatize{ // On privatise un canal pour attendre la réception de la valeur écrite
-				channel1,
+				chanName(channel1),
 				pi.Parallel{
 					innerTranslate(v.Value, channel1),
 					pi.ReceiveThen{
-						channel1,
+						chanName(channel1),
 						pi.Variable("value"),
 						finalExpr,
 					},
@@ -187,18 +179,18 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 		return finalExpr
 	case lambda.Deref:
 		return pi.Privatize{
-			channel1,
+			chanName(channel1),
 			pi.Parallel{
 				innerTranslate(v.Name, channel1),
 				pi.ReceiveThen{
-					channel1,
+					chanName(channel1),
 					pi.Variable("refName"),
 					pi.ReceiveThen{
 						"refName",
 						pi.Variable("refContent"),
 						pi.Parallel{
 							pi.Send{"refName", pi.Variable("refContent")},
-							pi.Send{channel, pi.Variable("refContent")},
+							pi.Send{chanName(channel), pi.Variable("refContent")},
 						},
 					},
 				},
@@ -220,7 +212,7 @@ func translateLambdaTerminal(lexpr lambda.Lambda) pi.Terminal {
 		}
 }
 
-func translateArith(L, R lambda.Lambda, sendExpr func (L, R pi.Terminal) pi.Expr, channel1, channel2 string) pi.Expr {
+func translateArith(L, R lambda.Lambda, sendExpr func (L, R pi.Terminal) pi.Expr, channel1, channel2 int) pi.Expr {
 	t1 := translateLambdaTerminal(L)
 	t2 := translateLambdaTerminal(R)
 
@@ -238,11 +230,11 @@ func translateArith(L, R lambda.Lambda, sendExpr func (L, R pi.Terminal) pi.Expr
 
 	if t1 == nil { // L n'est pas simple, on utilise une continuation
 		finalExpr = pi.Privatize{
-			channel1,
+			chanName(channel1),
 			pi.Parallel{
 				innerTranslate(L, channel1),
 				pi.ReceiveThen{
-					channel1,
+					chanName(channel1),
 					pi.Variable("lresult"),
 					finalExpr,
 				},
@@ -252,11 +244,11 @@ func translateArith(L, R lambda.Lambda, sendExpr func (L, R pi.Terminal) pi.Expr
 
 	if t2 == nil { // R n'est pas simple, on utilise une continuation
 		finalExpr = pi.Privatize{
-			channel2,
+			chanName(channel2),
 			pi.Parallel{
 				innerTranslate(R, channel2),
 				pi.ReceiveThen{
-					channel2,
+					chanName(channel2),
 					pi.Variable("rresult"),
 					finalExpr,
 				},
@@ -270,16 +262,16 @@ func translateArith(L, R lambda.Lambda, sendExpr func (L, R pi.Terminal) pi.Expr
 // This is basically a swap, and we us it for swap and write:
 // * A write is a swap where we trash the received value
 // * A swap is... well, a swap
-func translatePrimitives(variable, ref string, value, then lambda.Lambda, channel, channel1 string) pi.Expr {
+func translatePrimitives(variable, ref string, value, then lambda.Lambda, channel, channel1 int) pi.Expr {
 	return pi.Privatize{
-		channel1,
+		chanName(channel1),
 		pi.Parallel{
 			innerTranslate(value, channel1),
 			pi.ReceiveThen{
 				ref,
 				pi.Variable(variable),
 				pi.ReceiveThen{
-					channel1,
+					chanName(channel1),
 					pi.Variable("retrans"),
 					pi.Parallel{
 						pi.Send{ref, pi.Variable("retrans")},
