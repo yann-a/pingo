@@ -206,6 +206,10 @@ func (x *lambdaLex) string(c rune, yylval *lambdaSymType) int {
   if b.String() == "new" { return NEW }
   if b.String() == "in" { return IN }
 
+  if yylval.s == "q" || yylval.s == "r" || yylval.s == "s"  {
+    panic(fmt.Sprintf("Variable name '%v' is reserved.", yylval.s))
+  }
+
   return VAR
 }
 
