@@ -1,0 +1,1 @@
+new r = 3 in (fun x y -> z<-r; print (z + x + y)) (!r) (print 6)

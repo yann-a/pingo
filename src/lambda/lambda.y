@@ -25,6 +25,7 @@ import (
 %token NEW IN
 %token FUN LPAREN RPAREN
 %token PLUS MINUS TIMES DIV
+%token DEREF
 %token GT LT
 %token SEMICOLON COLON EQUAL
 %token <num> INT
@@ -67,6 +68,7 @@ litteral:
     INT                                            { $$ = $1                               }
   | VAR                                            { $$ = $1                               }
   | LPAREN lambda RPAREN                           { $$ = $2                               }
+  | DEREF litteral                                 { $$ = Deref{$2}                        }
 
 
 /**********     Lexer     ***********/
@@ -122,6 +124,8 @@ func (x *lambdaLex) Lex(yylval *lambdaSymType) int {
         return TIMES
       case '/':
         return DIV
+      case '!':
+        return DEREF
       case ' ', '\t', '\n', '\r':
       default:
         if unicode.IsLetter(c) {

@@ -88,3 +88,8 @@ type New struct {
 }
 
 func (l New) isLambda() {}
+
+type Deref struct{
+	Name Lambda
+}
+func (l Deref) isLambda() {}

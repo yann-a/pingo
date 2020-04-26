@@ -185,6 +185,25 @@ func innerTranslate(lexpr lambda.Lambda, channel string) pi.Expr {
 		}
 
 		return finalExpr
+	case lambda.Deref:
+		return pi.Privatize{
+			channel1,
+			pi.Parallel{
+				innerTranslate(v.Name, channel1),
+				pi.ReceiveThen{
+					channel1,
+					pi.Variable("refName"),
+					pi.ReceiveThen{
+						"refName",
+						pi.Variable("refContent"),
+						pi.Parallel{
+							pi.Send{"refName", pi.Variable("refContent")},
+							pi.Send{channel, pi.Variable("refContent")},
+						},
+					},
+				},
+			},
+		}
 	default:
 		panic("not supposed to happen")
 	}
