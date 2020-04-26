@@ -75,6 +75,8 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 
 		if v.Eq == (val_l == val_r) {
 			eval(v.Then, envir, wg)
+		} else {
+			wg.Done()
 		}
 
 	case Repl:
