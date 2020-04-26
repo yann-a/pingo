@@ -1,0 +1,17 @@
+!initiateackermann(continuation).
+  (ackermann)(
+    ^continuation ackermann |
+    !ackermann(m, n).(
+      [m=0] ^continuation (n+1) |
+      [m!=0][n=0] (cont) (^initiateackermann cont | cont(ackermann).(^ackermann (m-1, 1) | cont(val).^continuation val)) |
+      [m!=0][n!=0] (cont) (
+        ^initiateackermann cont |
+        cont(ackermann).(
+          ^ackermann (m, n-1) | cont (val1). (^ackermann(m-1, val1) | cont(val2).^continuation val2)
+        )
+      )
+    )
+  ) |
+
+^initiateackermann q |
+q(ackermann).(^ackermann(3, 3) | q(val).print val)
