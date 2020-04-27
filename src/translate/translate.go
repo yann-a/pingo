@@ -144,9 +144,9 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 			},
 		}
 	case lambda.Write:
-		return translatePrimitives("trash", string(v.Ref), v.Val, v.Then, channel, channel1)
+		return translatePrimitives(pi.Nothing{}, string(v.Ref), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
-		return translatePrimitives(string(v.Var), string(v.Ref), v.Val, v.Then, channel, channel1)
+		return translatePrimitives(pi.Variable(v.Var), string(v.Ref), v.Val, v.Then, channel, channel1)
 	case lambda.New:
 		var t pi.Terminal = translateLambdaTerminal(v.Value)
 		if t == nil { // Si l'expression écrit n'est pas simple
@@ -262,14 +262,14 @@ func translateArith(L, R lambda.Lambda, sendExpr func (L, R pi.Terminal) pi.Expr
 // This is basically a swap, and we us it for swap and write:
 // * A write is a swap where we trash the received value
 // * A swap is... well, a swap
-func translatePrimitives(variable, ref string, value, then lambda.Lambda, channel, channel1 int) pi.Expr {
+func translatePrimitives(variable pi.Terminal, ref string, value, then lambda.Lambda, channel, channel1 int) pi.Expr {
 	return pi.Privatize{
 		chanName(channel1),
 		pi.Parallel{
 			innerTranslate(value, channel1),
 			pi.ReceiveThen{
 				ref,
-				pi.Variable(variable),
+				variable,
 				pi.ReceiveThen{
 					chanName(channel1),
 					pi.Variable("retrans"),
