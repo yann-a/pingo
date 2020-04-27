@@ -24,7 +24,7 @@ func (e ReceiveThen) String() string {
 }
 
 func (e Privatize) String() string {
-	return fmt.Sprintf("((%v)%v)", e.Channel, e.Then)
+	return fmt.Sprintf("((%v) %v)", e.Channel, e.Then)
 }
 
 func (e Print) String() string {
@@ -72,4 +72,8 @@ func (e Conditional) String() string {
 
 func (e Repl) String() string {
 	return fmt.Sprintf("(!%v(%v).%v)", e.Channel, e.Pattern, e.Then)
+}
+
+func (e Nothing) String() string {
+	return ""
 }

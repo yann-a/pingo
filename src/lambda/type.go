@@ -82,14 +82,15 @@ func (l Swap) isLambda() {}
 
 // Permet d'instancier une réf
 type New struct {
-	Var Lvar
+	Var   Lvar
 	Value Lambda
-	Then Lambda
+	Then  Lambda
 }
 
 func (l New) isLambda() {}
 
-type Deref struct{
+type Deref struct {
 	Name Lambda
 }
+
 func (l Deref) isLambda() {}

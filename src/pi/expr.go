@@ -124,5 +124,6 @@ type Div struct {
 
 func (c Div) isTerminal() {}
 
-type Nothing struct {}
+type Nothing struct{}
+
 func (c Nothing) isTerminal() {}

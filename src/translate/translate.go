@@ -73,7 +73,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		return translateArith(
 			v.Fun,
 			v.Exp,
-			func (L, R pi.Terminal) pi.Expr {
+			func(L, R pi.Terminal) pi.Expr {
 				return pi.Send{
 					string(L.(pi.Variable)),
 					pi.Pair{R, pi.Variable(chanName(channel))},
@@ -86,7 +86,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		return translateArith(
 			v.L,
 			v.R,
-			func (L, R pi.Terminal) pi.Expr {
+			func(L, R pi.Terminal) pi.Expr {
 				return pi.Send{
 					chanName(channel),
 					pi.Add{L, R},
@@ -99,7 +99,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		return translateArith(
 			v.L,
 			v.R,
-			func (L, R pi.Terminal) pi.Expr {
+			func(L, R pi.Terminal) pi.Expr {
 				return pi.Send{
 					chanName(channel),
 					pi.Sub{L, R},
@@ -112,7 +112,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		return translateArith(
 			v.L,
 			v.R,
-			func (L, R pi.Terminal) pi.Expr {
+			func(L, R pi.Terminal) pi.Expr {
 				return pi.Send{
 					chanName(channel),
 					pi.Mul{L, R},
@@ -125,7 +125,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		return translateArith(
 			v.L,
 			v.R,
-			func (L, R pi.Terminal) pi.Expr {
+			func(L, R pi.Terminal) pi.Expr {
 				return pi.Send{
 					chanName(channel),
 					pi.Div{L, R},
@@ -202,17 +202,17 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 }
 
 func translateLambdaTerminal(lexpr lambda.Lambda) pi.Terminal {
-		switch v := lexpr.(type) {
-		case lambda.Lconst:
-			return pi.Constant(v)
-		case lambda.Lvar:
-			return pi.Variable(v)
-		default:
-			return nil
-		}
+	switch v := lexpr.(type) {
+	case lambda.Lconst:
+		return pi.Constant(v)
+	case lambda.Lvar:
+		return pi.Variable(v)
+	default:
+		return nil
+	}
 }
 
-func translateArith(L, R lambda.Lambda, sendExpr func (L, R pi.Terminal) pi.Expr, channel1, channel2 int) pi.Expr {
+func translateArith(L, R lambda.Lambda, sendExpr func(L, R pi.Terminal) pi.Expr, channel1, channel2 int) pi.Expr {
 	t1 := translateLambdaTerminal(L)
 	t2 := translateLambdaTerminal(R)
 
