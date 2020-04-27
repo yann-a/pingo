@@ -74,13 +74,16 @@ innerexpression:
   | REPL VAR pattern DOT innerexpression           { $$ = Repl{$2, $3, $5}                 }
   | receiveThen                                    { $$ = $1                               }
   | OUTPUT VAR value                               { $$ = Send{$2, $3}                     }
+  | OUTPUT VAR                                     { $$ = Send{$2, Nothing{}}              }
   | PRINT value                                    { $$ = Print{$2, Skip(0)}               }
   | PRINT value SEMICOLON innerexpression          { $$ = Print{$2, $4}                    }
   | BRA value EQUAL value KET innerexpression      { $$ = Conditional{$2, true, $4, $6}    }
   | BRA value REPL EQUAL value KET innerexpression { $$ = Conditional{$2, false, $5, $7}   }
 
 receiveThen:
-  VAR pattern DOT innerexpression                { $$ = ReceiveThen{$1, $2, $4}          }
+    VAR pattern DOT innerexpression                { $$ = ReceiveThen{$1, $2, $4}          }
+  | VAR DOT innerexpression                        { $$ = ReceiveThen{$1, Nothing{}, $3}   }
+  | VAR LPAREN RPAREN DOT innerexpression          { $$ = ReceiveThen{$1, Nothing{}, $5}   }
 
 pattern: /* for reception */
     VAR                                            { $$ = Variable($1)                     }

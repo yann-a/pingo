@@ -25,6 +25,9 @@ type Vpair struct {
 
 func (c Vpair) isValue() {}
 
+// nothing is defined in eval.go and is also a terminal
+func (c Nothing) isValue() {}
+
 /**** Environment ****/
 type env struct {
 	name  Variable
@@ -68,6 +71,8 @@ func (e *env) set_from_pattern(p Terminal, val Value) *env {
 		pair := val.(Vpair)
 		env := e.set_value(pattern.V1.(Variable), pair.V1)
 		return env.set_value(pattern.V2.(Variable), pair.V2)
+	case Nothing:
+		return e
 	default:
 		panic("Not a value provided")
 	}

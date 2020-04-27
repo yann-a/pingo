@@ -116,6 +116,8 @@ func interpretTerminal(val Terminal, envir *env) Value {
 		return interpretTerminal(v.V1, envir).(Constant) * interpretTerminal(v.V2, envir).(Constant)
 	case Div:
 		return interpretTerminal(v.V1, envir).(Constant) / interpretTerminal(v.V2, envir).(Constant)
+	case Nothing:
+		return Nothing{}
 	default:
 		panic("not a value provided")
 	}
