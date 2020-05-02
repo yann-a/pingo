@@ -11,10 +11,13 @@ import (
 	"pingo/src/lambda"
 	"pingo/src/pi"
 	"pingo/src/translate"
+	"pingo/src/typing"
 	"sync"
 )
 
 func main() {
+	_ = typing.Pair{}
+	
 	// The options of the executable
 	showSrc := flag.Bool("showsrc", false, "Output the parsed code")
 	outCode := flag.Bool("outcode", false, "Output the code before executing it (after translation if any")
