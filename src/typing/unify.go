@@ -65,32 +65,39 @@ func typeTerminal(terminal pi.Terminal, env *env) *Chain {
   switch v := terminal.(type) {
   case pi.Constant:
     return createRepr(Int{})
+
   case pi.Variable:
-    return env.get_value(v)
+    return env.get_type(v)
+
   case pi.Pair:
     return createRepr(Pair{typeTerminal(v.V1, env), typeTerminal(v.V2, env)})
   case pi.Nothing:
     return createRepr(Void{})
+
   case pi.Add:
     unify(typeTerminal(v.V1, env), createRepr(Int{}))
     unify(typeTerminal(v.V2, env), createRepr(Int{}))
 
     return createRepr(Int{})
+
   case pi.Sub:
     unify(typeTerminal(v.V1, env), createRepr(Int{}))
     unify(typeTerminal(v.V2, env), createRepr(Int{}))
 
     return createRepr(Int{})
+
   case pi.Mul:
     unify(typeTerminal(v.V1, env), createRepr(Int{}))
     unify(typeTerminal(v.V2, env), createRepr(Int{}))
 
     return createRepr(Int{})
+
   case pi.Div:
     unify(typeTerminal(v.V1, env), createRepr(Int{}))
     unify(typeTerminal(v.V2, env), createRepr(Int{}))
 
     return createRepr(Int{})
+
   default:
     panic("Unknown expr type")
   }
@@ -100,10 +107,42 @@ func TypeExpression(expr pi.Expr, env *env) {
   switch v := expr.(type) {
   case pi.Skip:
     return
+
   case pi.Parallel:
     for _, task := range v {
       TypeExpression(task, env)
     }
+
+  case pi.Send:
+    chantype := typeTerminal(pi.Variable(v.Channel), env)
+    senttype := typeTerminal(v.Value, env)
+
+    unify(chantype, createRepr(Channel{senttype}))
+
+  case pi.ReceiveThen:
+    subenv, argtype := env.type_from_pattern(v.Pattern)
+    unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype}))
+
+    TypeExpression(v.Then, subenv)
+
+  case pi.Repl:
+    subenv, argtype := env.type_from_pattern(v.Pattern)
+    unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype}))
+
+    TypeExpression(v.Then, subenv)
+
+  case pi.Print:
+    unify(typeTerminal(v.V, env), createRepr(Int{}))
+    TypeExpression(v.Then, env)
+
+  case pi.Privatize:
+    newenv := env.privatize(pi.Variable(v.Channel))
+    TypeExpression(v.Then, newenv)
+
+  case pi.Choose:
+    TypeExpression(v.E, env)
+    TypeExpression(v.F, env)
+
   default:
     panic("Unknown expr type")
   }

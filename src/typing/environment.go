@@ -21,11 +21,11 @@ type env struct {
 
 /**** Methods ****/
 // We append the value at the front of the environment
-func (e *env) set_value(x pi.Variable, v *Chain) *env {
-	return &env{x, v, e}
+func (e *env) privatize(x pi.Variable) *env {
+	return &env{x, createRepr(Variable{}), e}
 }
 
-func (e *env) get_value(x pi.Variable) *Chain {
+func (e *env) get_type(x pi.Variable) *Chain {
 	if e.name == x {
 		return e.value
 	}
@@ -42,5 +42,23 @@ func (e *env) get_value(x pi.Variable) *Chain {
 	}
 
 	// Otherwise we dive deeper in the environment
-	return e.next.get_value(x)
+	return e.next.get_type(x)
+}
+
+func (e *env) type_from_pattern(p pi.Terminal) (*env, *Chain) {
+	switch pattern := p.(type) {
+	case pi.Variable:
+		return e.privatize(pattern), e.get_type(pattern)
+
+	case pi.Pair:
+		env1 := e.privatize(pattern.V1.(pi.Variable))
+		env2 := env1.privatize(pattern.V2.(pi.Variable))
+
+		return env2, createRepr(Pair{e.get_type(pattern.V1.(pi.Variable)), e.get_type(pattern.V2.(pi.Variable))})
+
+	case pi.Nothing:
+		return e, createRepr(Void{})
+	default:
+		panic("Not a pattern provided")
+	}
 }
