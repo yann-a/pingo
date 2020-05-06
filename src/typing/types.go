@@ -20,7 +20,7 @@ type Type interface {
   isType()
 }
 
-type Int int
+type Int struct {}
 func (r Int) isType() { }
 
 type Channel struct {

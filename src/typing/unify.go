@@ -1,12 +1,14 @@
 package typing
 
+import "pingo/src/pi"
+
 func evalRepr(chain *Chain) *Chain {
   switch v := (*chain).(type) {
   case Repr:
-    return chain;
+    return chain
   case Link:
     repr := evalRepr(v.R)
-    *chain = Link{repr} // on pointe directement vers le réprésentant
+    v.R = repr // on pointe directement vers le réprésentant
 
     return repr
   default:
@@ -56,5 +58,53 @@ func unify(t1, t2 *Chain) {
     if !ok {
       panic("Unification failed")
     }
+  }
+}
+
+func typeTerminal(terminal pi.Terminal, env *env) *Chain {
+  switch v := terminal.(type) {
+  case pi.Constant:
+    return createRepr(Int{})
+  case pi.Variable:
+    return env.get_value(v)
+  case pi.Pair:
+    return createRepr(Pair{typeTerminal(v.V1, env), typeTerminal(v.V2, env)})
+  case pi.Nothing:
+    return createRepr(Void{})
+  case pi.Add:
+    unify(typeTerminal(v.V1, env), createRepr(Int{}))
+    unify(typeTerminal(v.V2, env), createRepr(Int{}))
+
+    return createRepr(Int{})
+  case pi.Sub:
+    unify(typeTerminal(v.V1, env), createRepr(Int{}))
+    unify(typeTerminal(v.V2, env), createRepr(Int{}))
+
+    return createRepr(Int{})
+  case pi.Mul:
+    unify(typeTerminal(v.V1, env), createRepr(Int{}))
+    unify(typeTerminal(v.V2, env), createRepr(Int{}))
+
+    return createRepr(Int{})
+  case pi.Div:
+    unify(typeTerminal(v.V1, env), createRepr(Int{}))
+    unify(typeTerminal(v.V2, env), createRepr(Int{}))
+
+    return createRepr(Int{})
+  default:
+    panic("Unknown expr type")
+  }
+}
+
+func TypeExpression(expr pi.Expr, env *env) {
+  switch v := expr.(type) {
+  case pi.Skip:
+    return
+  case pi.Parallel:
+    for _, task := range v {
+      TypeExpression(task, env)
+    }
+  default:
+    panic("Unknown expr type")
   }
 }
