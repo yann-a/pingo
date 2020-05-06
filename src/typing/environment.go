@@ -3,7 +3,7 @@ package typing
 import (
 	"sync/atomic"
 	"unsafe"
-  "pingo/src/pi"
+	"pingo/src/pi"
 )
 
 func createRepr(t Type) *Chain {

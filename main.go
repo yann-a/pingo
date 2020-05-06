@@ -31,12 +31,6 @@ func main() {
 	in := bufio.NewReader(buffer)
 	ret := Parse(in, *translateInput, *showSrc)
 
-	if ret == nil {
-		return
-	}
-
-	typing.TypeExpression(ret)
-
 	// We print the code if asked
 	if *outCode {
 		fmt.Println(ret)

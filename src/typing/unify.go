@@ -154,6 +154,15 @@ func typeExpression(expr pi.Expr, env *env) {
     typeExpression(v.E, env)
     typeExpression(v.F, env)
 
+  case pi.Conditional:
+    typel := typeTerminal(v.E, env)
+    typer := typeTerminal(v.F, env)
+
+    unify(typel, createRepr(Int{}))
+    unify(typer, createRepr(Int{}))
+
+    typeExpression(v.Then, env)
+
   default:
     panic("Unknown expr type")
   }
