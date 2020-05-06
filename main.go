@@ -34,6 +34,7 @@ func main() {
 		fmt.Println(ret)
 	}
 
+	// We pass the expression through typing
 	typing.TypeExpression(ret)
 
 	// We want all goroutines to have finished before killing the process
