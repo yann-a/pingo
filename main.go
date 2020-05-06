@@ -17,7 +17,7 @@ import (
 
 func main() {
 	_ = typing.Pair{}
-	
+
 	// The options of the executable
 	showSrc := flag.Bool("showsrc", false, "Output the parsed code")
 	outCode := flag.Bool("outcode", false, "Output the code before executing it (after translation if any")
@@ -34,6 +34,8 @@ func main() {
 	if ret == nil {
 		return
 	}
+
+	typing.TypeExpression(ret)
 
 	// We print the code if asked
 	if *outCode {

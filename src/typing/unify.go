@@ -1,6 +1,9 @@
 package typing
 
-import "pingo/src/pi"
+import (
+  "fmt"
+  "pingo/src/pi"
+)
 
 func evalRepr(chain *Chain) *Chain {
   switch v := (*chain).(type) {
@@ -14,6 +17,10 @@ func evalRepr(chain *Chain) *Chain {
   default:
     panic("Unknown chain type")
   }
+}
+
+func failUnification(t1, t2 Type) {
+  panic(fmt.Sprintf("Failed unifying `%v` and `%v`", t1, t2))
 }
 
 func unify(t1, t2 *Chain) {
@@ -46,7 +53,7 @@ func unify(t1, t2 *Chain) {
   case Void:
     _, ok = type2.(Void)
     if !ok {
-      panic("Unification failed")
+      failUnification(type1, type2)
     }
 
   case Channel:
@@ -56,8 +63,11 @@ func unify(t1, t2 *Chain) {
   case Int:
     _, ok = type2.(Int)
     if !ok {
-      panic("Unification failed")
+      failUnification(type1, type2)
     }
+
+  default:
+    failUnification(type1, type2)
   }
 }
 
@@ -103,14 +113,14 @@ func typeTerminal(terminal pi.Terminal, env *env) *Chain {
   }
 }
 
-func TypeExpression(expr pi.Expr, env *env) {
+func typeExpression(expr pi.Expr, env *env) {
   switch v := expr.(type) {
   case pi.Skip:
     return
 
   case pi.Parallel:
     for _, task := range v {
-      TypeExpression(task, env)
+      typeExpression(task, env)
     }
 
   case pi.Send:
@@ -119,31 +129,36 @@ func TypeExpression(expr pi.Expr, env *env) {
 
     unify(chantype, createRepr(Channel{senttype}))
 
+
   case pi.ReceiveThen:
     subenv, argtype := env.type_from_pattern(v.Pattern)
     unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype}))
 
-    TypeExpression(v.Then, subenv)
+    typeExpression(v.Then, subenv)
 
   case pi.Repl:
     subenv, argtype := env.type_from_pattern(v.Pattern)
     unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype}))
 
-    TypeExpression(v.Then, subenv)
+    typeExpression(v.Then, subenv)
 
   case pi.Print:
     unify(typeTerminal(v.V, env), createRepr(Int{}))
-    TypeExpression(v.Then, env)
+    typeExpression(v.Then, env)
 
   case pi.Privatize:
     newenv := env.privatize(pi.Variable(v.Channel))
-    TypeExpression(v.Then, newenv)
+    typeExpression(v.Then, newenv)
 
   case pi.Choose:
-    TypeExpression(v.E, env)
-    TypeExpression(v.F, env)
+    typeExpression(v.E, env)
+    typeExpression(v.F, env)
 
   default:
     panic("Unknown expr type")
   }
+}
+
+func TypeExpression(expr pi.Expr) {
+    typeExpression(expr, &env{})
 }

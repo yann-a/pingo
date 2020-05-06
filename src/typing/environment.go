@@ -48,13 +48,15 @@ func (e *env) get_type(x pi.Variable) *Chain {
 func (e *env) type_from_pattern(p pi.Terminal) (*env, *Chain) {
 	switch pattern := p.(type) {
 	case pi.Variable:
-		return e.privatize(pattern), e.get_type(pattern)
+		env := e.privatize(pattern)
+
+		return env, env.get_type(pattern)
 
 	case pi.Pair:
 		env1 := e.privatize(pattern.V1.(pi.Variable))
 		env2 := env1.privatize(pattern.V2.(pi.Variable))
 
-		return env2, createRepr(Pair{e.get_type(pattern.V1.(pi.Variable)), e.get_type(pattern.V2.(pi.Variable))})
+		return env2, createRepr(Pair{env2.get_type(pattern.V1.(pi.Variable)), env2.get_type(pattern.V2.(pi.Variable))})
 
 	case pi.Nothing:
 		return e, createRepr(Void{})
