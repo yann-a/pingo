@@ -174,6 +174,9 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
         return KET
       case '!':
         return REPL
+      case '_':
+        yylval.s = "_"
+        return VAR
       case ' ', '\t', '\n', '\r':
       default:
         if unicode.IsLetter(c) {

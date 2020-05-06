@@ -38,6 +38,10 @@ type env struct {
 /**** Methods ****/
 // We append the value at the front of the environment
 func (e *env) set_value(x Variable, v Value) *env {
+	if x == "_" { // Ignore variable
+		return e;
+	}
+
 	return &env{x, v, e}
 }
 

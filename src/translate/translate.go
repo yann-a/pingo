@@ -144,7 +144,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 			},
 		}
 	case lambda.Write:
-		return translatePrimitives(pi.Nothing{}, string(v.Ref), v.Val, v.Then, channel, channel1)
+		return translatePrimitives(pi.Variable("_"), string(v.Ref), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
 		return translatePrimitives(pi.Variable(v.Var), string(v.Ref), v.Val, v.Then, channel, channel1)
 	case lambda.New:
