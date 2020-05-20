@@ -70,7 +70,7 @@ chooseExpression:
 innerexpression:
     INT                                            { $$ = Skip($1)                         }
   | LPAREN expr RPAREN                             { $$ = $2                               }
-  | LPAREN VAR RPAREN innerexpression              { $$ = Privatize{$2, $4}                }
+  | LPAREN VAR RPAREN innerexpression              { $$ = Privatize{$2, FunChan, $4} }
   | REPL VAR pattern DOT innerexpression           { $$ = Repl{$2, $3, $5}                 }
   | receiveThen                                    { $$ = $1                               }
   | OUTPUT VAR value                               { $$ = Send{$2, $3}                     }

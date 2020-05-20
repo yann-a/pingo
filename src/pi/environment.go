@@ -11,7 +11,10 @@ type Value interface {
 }
 
 // channels are values (they can be sent through channels)
-type Channel chan Value
+type Channel struct {
+	Ch chan Value;
+	T ChanType
+}
 
 func (c Channel) isValue() {}
 
@@ -52,7 +55,8 @@ func (e *env) get_value(x Variable) Value {
 
 	// If we reach the end of the environment
 	if e.next == nil {
-		channel := make(Channel)
+		ch := make(chan Value)
+		channel := Channel{ch, FunChan}
 
 		// On essaye de mettre à jour le pointeur de fin
 		unsafePointer := (*unsafe.Pointer)(unsafe.Pointer(&e.next))
@@ -60,7 +64,7 @@ func (e *env) get_value(x Variable) Value {
 			return channel
 		}
 
-		close(channel) // in case of failure
+		close(channel.Ch) // in case of failure
 	}
 
 	// Otherwise we dive deeper in the environment
