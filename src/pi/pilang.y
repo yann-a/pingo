@@ -24,7 +24,7 @@ import (
 
 %type <ret> expr innerexpression chooseExpression receiveThen
 %type <v> pattern value literal arithvalue arith
-%token LPAREN RPAREN DOT PIPE COMMA SEMICOLON
+%token LPAREN RPAREN DOT PIPE COMMA SEMICOLON COLON
 %token <num> INT
 %token <s> VAR
 %token OUTPUT PRINT
@@ -70,7 +70,8 @@ chooseExpression:
 innerexpression:
     INT                                            { $$ = Skip($1)                         }
   | LPAREN expr RPAREN                             { $$ = $2                               }
-  | LPAREN VAR RPAREN innerexpression              { $$ = Privatize{$2, FunChan, $4} }
+  | LPAREN VAR RPAREN innerexpression              { $$ = Privatize{$2, FunChan, $4}       }
+  | LPAREN VAR COLON VAR RPAREN innerexpression    { $$ = Privatize{$2, ChanType($4), $6}  }
   | REPL VAR pattern DOT innerexpression           { $$ = Repl{$2, $3, $5}                 }
   | receiveThen                                    { $$ = $1                               }
   | OUTPUT VAR value                               { $$ = Send{$2, $3}                     }
@@ -156,6 +157,8 @@ func (x *exprLex) Lex(yylval *exprSymType) int {
         return COMMA
       case ';':
         return SEMICOLON
+      case ':':
+        return COLON
       case '^':
         return OUTPUT
       case '+':
