@@ -26,7 +26,7 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		// we don't call wg.Done() to take into account the goroutine that will receive this message
 		channel := envir.get_value(Variable(v.Channel)).(Channel)
 
-		if channel.T == RefChan {
+		if channel.T != FunChan {
 				wg.Done() // We don't count locked sending
 		}
 		channel.Ch <- val
@@ -64,8 +64,10 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		channel1 := envir.get_value(Variable(v.E.Channel)).(Channel)
 		channel2 := envir.get_value(Variable(v.F.Channel)).(Channel)
 
-		if channel1.T == FunChan {
+		if channel1.T == FunChan && channel2.T == FunChan {
 				wg.Done() // We don't count locked reception
+		} else {
+			panic("should not be done")
 		}
 		select {
 		case val := <-channel1.Ch:

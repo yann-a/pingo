@@ -1,14 +1,13 @@
 package translate
 
 import (
+	"fmt"
 	"pingo/src/lambda"
 	"pingo/src/pi"
 )
 
 func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
-	freechannel := (channel + 1) % 2
-
-	translation := innerTranslate(lexpr, freechannel)
+	translation := innerTranslate(lexpr, channel)
 
 	return pi.Parallel{
 		translation,
@@ -22,7 +21,7 @@ func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
 }
 
 func chanName(channel int) string {
-	return "chan" + string(channel)
+	return fmt.Sprintf("cont%d", channel)
 }
 
 func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
