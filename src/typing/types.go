@@ -1,5 +1,7 @@
 package typing
 
+import "pingo/src/pi"
+
 // Chaines de représentants
 type Chain interface {
   isChain()
@@ -25,6 +27,7 @@ func (r Int) isType() { }
 
 type Channel struct {
   Inner *Chain
+	ChannelType pi.ChanType
 }
 func (r Channel) isType() { }
 

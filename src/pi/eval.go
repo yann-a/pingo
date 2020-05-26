@@ -67,7 +67,7 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		if channel1.T == FunChan && channel2.T == FunChan {
 				wg.Done() // We don't count locked reception
 		} else {
-			panic("should not be done")
+			panic("This case is forbidden by typing")
 		}
 		select {
 		case val := <-channel1.Ch:

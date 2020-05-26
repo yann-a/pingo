@@ -59,6 +59,13 @@ func unify(t1, t2 *Chain) {
   case Channel:
     ch2 := type2.(Channel)
     unify(v1.Inner, ch2.Inner)
+    if v1.ChannelType == "" {
+      v1.ChannelType = ch2.ChannelType
+    } else if ch2.ChannelType == "" {
+      ch2.ChannelType = v1.ChannelType
+    } else if v1.ChannelType != ch2.ChannelType {
+      failUnification(type1, type2)
+    }
 
   case Int:
     _, ok = type2.(Int)
@@ -127,18 +134,18 @@ func typeExpression(expr pi.Expr, env *env) {
     chantype := typeTerminal(pi.Variable(v.Channel), env)
     senttype := typeTerminal(v.Value, env)
 
-    unify(chantype, createRepr(Channel{senttype}))
+    unify(chantype, createRepr(Channel{senttype, ""}))
 
 
   case pi.ReceiveThen:
     subenv, argtype := env.type_from_pattern(v.Pattern)
-    unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype}))
+    unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype, ""}))
 
     typeExpression(v.Then, subenv)
 
   case pi.Repl:
     subenv, argtype := env.type_from_pattern(v.Pattern)
-    unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype}))
+    unify(env.get_type(pi.Variable(v.Channel)), createRepr(Channel{argtype, ""}))
 
     typeExpression(v.Then, subenv)
 
@@ -147,12 +154,17 @@ func typeExpression(expr pi.Expr, env *env) {
     typeExpression(v.Then, env)
 
   case pi.Privatize:
-    newenv := env.privatize(pi.Variable(v.Channel))
+    newenv := env.privatize(pi.Variable(v.Channel), v.ChannelType)
     typeExpression(v.Then, newenv)
 
   case pi.Choose:
     typeExpression(v.E, env)
     typeExpression(v.F, env)
+
+    ch1 := env.get_type(pi.Variable(v.E.Channel))
+    ch2 := env.get_type(pi.Variable(v.F.Channel))
+    unify(ch1, createRepr(Channel{createRepr(Variable{}), pi.FunChan}))
+    unify(ch2, createRepr(Channel{createRepr(Variable{}), pi.FunChan}))
 
   case pi.Conditional:
     typel := typeTerminal(v.E, env)
