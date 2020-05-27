@@ -1,5 +1,12 @@
 package pi
 
+type ChanType string
+
+const(
+    RefChan = "refchan"
+    FunChan = "funchan"
+)
+
 /**** Expressions ****/
 type Expr interface {
 	isExpr()        // To indicate a type is an expression
@@ -31,6 +38,7 @@ func (e ReceiveThen) isExpr() {}
 // used to define private channels
 type Privatize struct {
 	Channel string
+	ChannelType ChanType
 	Then    Expr
 }
 

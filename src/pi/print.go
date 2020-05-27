@@ -24,7 +24,11 @@ func (e ReceiveThen) String() string {
 }
 
 func (e Privatize) String() string {
-	return fmt.Sprintf("((%v) %v)", e.Channel, e.Then)
+	if e.ChannelType != FunChan {
+ 		return fmt.Sprintf("((%v : %s) %v)", e.Channel, string(e.ChannelType), e.Then)
+	}
+
+ 	return fmt.Sprintf("((%v) %v)", e.Channel, e.Then)
 }
 
 func (e Print) String() string {

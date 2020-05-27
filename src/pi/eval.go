@@ -25,20 +25,26 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 
 		// we don't call wg.Done() to take into account the goroutine that will receive this message
 		channel := envir.get_value(Variable(v.Channel)).(Channel)
-		channel <- val
+
+		if channel.T != FunChan {
+				wg.Done() // We don't count locked sending
+		}
+		channel.Ch <- val
 
 	case ReceiveThen:
 		channel := envir.get_value(Variable(v.Channel)).(Channel)
 
-		wg.Done()            // in case the goroutine is paused
-		message := <-channel // the sender reincrements wg when sending a message
+		if channel.T == FunChan {
+				wg.Done() // We don't count locked reception
+		}
+		message := <-channel.Ch // the sender reincrements wg when sending a message
 
 		envir = envir.set_from_pattern(v.Pattern, message)
 
 		eval(v.Then, envir, wg)
 
 	case Privatize:
-		envir2 := envir.set_value(Variable(v.Channel), make(Channel))
+		envir2 := envir.set_value(Variable(v.Channel), Channel{make(chan Value), v.ChannelType})
 
 		eval(v.Then, envir2, wg)
 
@@ -58,13 +64,17 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 		channel1 := envir.get_value(Variable(v.E.Channel)).(Channel)
 		channel2 := envir.get_value(Variable(v.F.Channel)).(Channel)
 
-		wg.Done()
+		if channel1.T == FunChan && channel2.T == FunChan {
+				wg.Done() // We don't count locked reception
+		} else {
+			panic("This case is forbidden by typing")
+		}
 		select {
-		case val := <-channel1:
+		case val := <-channel1.Ch:
 			envir = envir.set_from_pattern(v.E.Pattern, val)
 			eval(v.E.Then, envir, wg)
 
-		case val := <-channel2:
+		case val := <-channel2.Ch:
 			envir = envir.set_from_pattern(v.F.Pattern, val)
 			eval(v.F.Then, envir, wg)
 		}
@@ -81,8 +91,10 @@ func eval(e Expr, envir *env, wg *sync.WaitGroup) {
 
 	case Repl:
 		channel := envir.get_value(Variable(v.Channel)).(Channel)
-		wg.Done()
-		message := <-channel
+		if channel.T == FunChan {
+				wg.Done() // We don't count locked reception
+		}
+		message := <-channel.Ch
 
 		subenvir := envir.set_from_pattern(v.Pattern, message)
 

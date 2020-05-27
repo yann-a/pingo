@@ -1,14 +1,13 @@
 package translate
 
 import (
+	"fmt"
 	"pingo/src/lambda"
 	"pingo/src/pi"
 )
 
 func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
-	freechannel := (channel + 1) % 2
-
-	translation := innerTranslate(lexpr, freechannel)
+	translation := innerTranslate(lexpr, channel)
 
 	return pi.Parallel{
 		translation,
@@ -18,29 +17,11 @@ func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
 			pi.Pair{pi.Variable("x"), pi.Variable("q")},
 			pi.Print{pi.Variable("x"), pi.Send{"q", pi.Variable("x")}},
 		},
-
-		// On rajoute un cleaner pour nettoyer les réfs après leur création
-		pi.ReceiveThen{
-			chanName(freechannel),
-			pi.Variable("ret"),
-			pi.Parallel{
-				pi.Repl{
-					"refCleaner",
-					pi.Variable("a"),
-					pi.ReceiveThen{
-						"a",
-						pi.Variable("x"),
-						pi.Skip(0),
-					},
-				},
-				pi.Send{chanName(channel), pi.Variable("ret")},
-			},
-		},
 	}
 }
 
 func chanName(channel int) string {
-	return "chan" + string(channel)
+	return fmt.Sprintf("cont%d", channel)
 }
 
 func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
@@ -57,6 +38,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		// Une fonction lambda est transformée en un canal qui reçoit des paires (argument, canal de retour)
 		return pi.Privatize{
 			"y",
+			pi.FunChan,
 			pi.Parallel{
 				pi.Send{
 					chanName(channel),
@@ -155,8 +137,8 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 
 		finalExpr := pi.Privatize{ // On réserve la variable de la future réf
 			string(v.Var),
+			pi.RefChan,
 			pi.Parallel{
-				pi.Send{"refCleaner", pi.Variable(v.Var)},
 				pi.Send{string(v.Var), t}, // émission de la valeur sur le canal de la réf
 				innerTranslate(v.Then, channel),
 			},
@@ -165,6 +147,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		if t == nil {
 			finalExpr = pi.Privatize{ // On privatise un canal pour attendre la réception de la valeur écrite
 				chanName(channel1),
+				pi.FunChan,
 				pi.Parallel{
 					innerTranslate(v.Value, channel1),
 					pi.ReceiveThen{
@@ -180,6 +163,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 	case lambda.Deref:
 		return pi.Privatize{
 			chanName(channel1),
+			pi.FunChan,
 			pi.Parallel{
 				innerTranslate(v.Name, channel1),
 				pi.ReceiveThen{
@@ -231,6 +215,7 @@ func translateArith(L, R lambda.Lambda, sendExpr func(L, R pi.Terminal) pi.Expr,
 	if t1 == nil { // L n'est pas simple, on utilise une continuation
 		finalExpr = pi.Privatize{
 			chanName(channel1),
+			pi.FunChan,
 			pi.Parallel{
 				innerTranslate(L, channel1),
 				pi.ReceiveThen{
@@ -245,6 +230,7 @@ func translateArith(L, R lambda.Lambda, sendExpr func(L, R pi.Terminal) pi.Expr,
 	if t2 == nil { // R n'est pas simple, on utilise une continuation
 		finalExpr = pi.Privatize{
 			chanName(channel2),
+			pi.FunChan,
 			pi.Parallel{
 				innerTranslate(R, channel2),
 				pi.ReceiveThen{
@@ -265,6 +251,7 @@ func translateArith(L, R lambda.Lambda, sendExpr func(L, R pi.Terminal) pi.Expr,
 func translatePrimitives(variable pi.Terminal, ref string, value, then lambda.Lambda, channel, channel1 int) pi.Expr {
 	return pi.Privatize{
 		chanName(channel1),
+		pi.FunChan,
 		pi.Parallel{
 			innerTranslate(value, channel1),
 			pi.ReceiveThen{
