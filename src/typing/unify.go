@@ -33,7 +33,10 @@ func unify(t1, t2 *Chain) {
   // si t1 est une variable
   _, ok := type1.(Variable)
   if ok {
-    *r1 = Link{r2} // on fait pointer r1 vers r2
+    if r1 != r2 {
+      *r1 = Link{r2} // on fait pointer r1 vers r2
+    }
+
     return
   }
 
