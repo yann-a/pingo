@@ -7,8 +7,9 @@ import (
 )
 
 func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
-	tr1 := ocamlToLambda(lexpr)
-	//fmt.Println(tr1)
+	n := 0
+	tr1 := ocamlToLambda(lexpr, &n)
+	fmt.Println(tr1)
 	translation := innerTranslate(tr1, channel)
 
 	return pi.Parallel{
