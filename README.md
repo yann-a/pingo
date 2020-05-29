@@ -50,7 +50,10 @@ For lambda-calculus+ref+"ocaml":
 + `let x = v in l` : binds the name x to v in l
 
 ## Reserved names ##
-Some names are reserved in lambda. They are listed here, and forbidden by the parser anyway :
+Some names are reserved in **lambda**. They are listed here, and forbidden by the parser anyway :
++ `funChan`
++ `cont0`, `cont1` and `cont2`
++ `ignoreVar`
 
 ## Running the tests
 

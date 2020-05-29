@@ -17,7 +17,7 @@ func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
 		translation,
 
 		pi.Repl{ // On définit print comme une fonction lambda usuelle
-			"print",
+			"prInt",
 			pi.Pair{pi.Variable("x"), pi.Variable("q")},
 			pi.Print{pi.Variable("x"), pi.Send{"q", pi.Variable("x")}},
 		},
@@ -41,15 +41,15 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 	case lambda.Lfun:
 		// Une fonction lambda est transformée en un canal qui reçoit des paires (argument, canal de retour)
 		return pi.Privatize{
-			"y",
+			"funChan",
 			pi.FunChan,
 			pi.Parallel{
 				pi.Send{
 					chanName(channel),
-					pi.Variable("y"),
+					pi.Variable("funChan"),
 				},
 				pi.Repl{
-					"y",
+					"funChan",
 					pi.Pair{pi.Variable(v.Arg), pi.Variable(chanName(0))},
 					innerTranslate(v.Exp, 0),
 				},
@@ -130,7 +130,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 			},
 		}
 	case lambda.Write:
-		return translatePrimitives(pi.Variable("_"), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
+		return translatePrimitives(pi.Variable("ignoreVar"), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
 		return translatePrimitives(pi.Variable(v.Var), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
 	case lambda.New:

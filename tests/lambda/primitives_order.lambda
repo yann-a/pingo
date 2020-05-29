@@ -1,1 +1,1 @@
-new a = 5 in new b = 12 in x<-b; x<-a:=x; y<-a; (fun x y -> 0) (print x) (print y)
+new a = 5 in new b = 12 in x<-b; x<-a:=x; y<-a; (fun x y -> 0) (prInt x) (prInt y)
