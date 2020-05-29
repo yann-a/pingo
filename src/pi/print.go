@@ -56,7 +56,7 @@ func (e Div) String() string {
 }
 
 func (e Skip) String() string {
-	return "skip"
+	return "0"
 }
 
 func (e Choose) String() string {
