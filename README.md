@@ -81,7 +81,7 @@ The executable reads from a file if provided, or stdin if none was provided or r
 ## A word about parsing
 Go comes with support of yacc through goyacc, but no proper lexer.
 Lexing is therefore done in a somewhat ugly but seemingly common way,
-directly in the .y file, by reading characters (calles runes) one by one.
+directly in the .y file, by reading characters (called runes) one by one.
 
 ## [French] Retour sur projet 2 (http://perso.ens-lyon.fr/daniel.hirschkoff/P2)
 
