@@ -43,9 +43,13 @@ func (e Write) String() string {
 }
 
 func (e Swap) String() string {
-	return fmt.Sprintf("(%v<-%v:=%v ; %v", e.Var, e.Ref, e.Val, e.Then)
+	return fmt.Sprintf("(%v<-%v:=%v ; %v)", e.Var, e.Ref, e.Val, e.Then)
 }
 
 func (e New) String() string {
 	return fmt.Sprintf("new %v = %v in %v", e.Var, e.Value, e.Then)
+}
+
+func (e Deref) String() string {
+	return fmt.Sprintf("!%v", e.Name)
 }

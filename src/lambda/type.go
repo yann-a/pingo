@@ -56,7 +56,7 @@ type Div struct {
 func (l Div) isLambda() {}
 
 type Read struct {
-	Var  Lambda
+	Var  Lvar
 	Ref  Lambda
 	Then Lambda
 }
@@ -72,7 +72,7 @@ type Write struct {
 func (l Write) isLambda() {}
 
 type Swap struct {
-	Var  Lambda
+	Var  Lvar
 	Ref  Lambda
 	Val  Lambda
 	Then Lambda

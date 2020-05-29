@@ -7,7 +7,9 @@ import (
 )
 
 func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
-	translation := innerTranslate(lexpr, channel)
+	tr1 := ocamlToLambda(lexpr)
+	//fmt.Println(tr1)
+	translation := innerTranslate(tr1, channel)
 
 	return pi.Parallel{
 		translation,
@@ -119,16 +121,16 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 	case lambda.Read:
 		return pi.ReceiveThen{
 			string(v.Ref.(lambda.Lvar)),
-			pi.Variable(v.Var.(lambda.Lvar)),
+			pi.Variable(v.Var),
 			pi.Parallel{
-				pi.Send{string(v.Ref.(lambda.Lvar)), pi.Variable(v.Var.(lambda.Lvar))},
+				pi.Send{string(v.Ref.(lambda.Lvar)), pi.Variable(v.Var)},
 				innerTranslate(v.Then, channel),
 			},
 		}
 	case lambda.Write:
 		return translatePrimitives(pi.Variable("_"), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
-		return translatePrimitives(pi.Variable(v.Var.(lambda.Lvar)), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
+		return translatePrimitives(pi.Variable(v.Var), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
 	case lambda.New:
 		var t pi.Terminal = translateLambdaTerminal(v.Value)
 		if t == nil { // Si l'expression écrit n'est pas simple
