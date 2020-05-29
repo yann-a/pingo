@@ -216,7 +216,7 @@ func (x *lambdaLex) string(c rune, yylval *lambdaSymType) int {
       return IN
     case "let":
       return LET
-    case "funChan", "cont0", "cont1", "cont2", "ignoreVar", "valueComp", "lresult", "rresult", "retrans":
+    case "funChan", "cont0", "cont1", "cont2", "valueComp", "lresult", "rresult", "retrans":
       panic(fmt.Sprintf("Sorry, keyword %s is reserved.", yylval.s))
     default:
       return VAR

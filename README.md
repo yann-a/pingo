@@ -57,7 +57,6 @@ For the three last constructions, note that :
 Some names are reserved in **lambda**. They are listed here, and forbidden by the parser anyway :
 + `funChan`
 + `cont0`, `cont1` and `cont2`
-+ `ignoreVar`
 + `valueComp`
 + `lresult` and `rresult`
 + `retrans`
