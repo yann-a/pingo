@@ -1,1 +1,1 @@
-new aa = 5 in new bb = 12 in yy<-aa; zz<-bb; ww<-aa; prInt ((yy+zz)*ww)
+new a = 5 in new b = 12 in y<-a; z<-b; w<-a; prInt ((y+z)*w)

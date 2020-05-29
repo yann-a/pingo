@@ -136,7 +136,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 	case lambda.New:
 		var t pi.Terminal = translateLambdaTerminal(v.Value)
 		if t == nil { // Si l'expression écrit n'est pas simple
-			t = pi.Variable("value")
+			t = pi.Variable("valueComp")
 		}
 
 		finalExpr := pi.Privatize{ // On réserve la variable de la future réf
@@ -156,7 +156,7 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 					innerTranslate(v.Value, channel1),
 					pi.ReceiveThen{
 						chanName(channel1),
-						pi.Variable("value"),
+						pi.Variable("valueComp"),
 						finalExpr,
 					},
 				},

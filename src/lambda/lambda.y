@@ -51,7 +51,7 @@ lambda:
   | value COLON EQUAL value                        { $$ = Write{$1, $4, Lconst(0)}         }
   | value COLON EQUAL value SEMICOLON lambda       { $$ = Write{$1, $4, $6}    }
   | VAR LT MINUS value COLON EQUAL value           { $$ = Swap{$1, $4, $7, Lconst(0)}      }
-  | VAR LT MINUS value COLON EQUAL value SEMICOLON lambda { $$ = Swap{$1, $4, $7, $9} }
+  | VAR LT MINUS value COLON EQUAL value SEMICOLON lambda { $$ = Swap{$1, $4, $7, $9}      }
 
 fundefinition:
     MINUS GT lambda                                { $$ = $3                               }
@@ -206,12 +206,21 @@ func (x *lambdaLex) string(c rune, yylval *lambdaSymType) int {
 
   yylval.s = Lvar(b.String())
 
-  if b.String() == "fun" { return FUN }
-  if b.String() == "new" { return NEW }
-  if b.String() == "in" { return IN }
-  if b.String() == "let" { return LET }
-
-  return VAR
+  // Search for tokens and reserved words
+  switch(yylval.s) {
+    case "fun":
+      return FUN
+    case "new":
+      return NEW
+    case "in":
+      return IN
+    case "let":
+      return LET
+    case "funChan", "cont0", "cont1", "cont2", "ignoreVar", "valueComp", "lresult", "rresult", "retrans":
+      panic(fmt.Sprintf("Sorry, keyword %s is reserved.", yylval.s))
+    default:
+      return VAR
+  }
 }
 
 // Return the next rune for the lexer.

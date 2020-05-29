@@ -54,6 +54,9 @@ Some names are reserved in **lambda**. They are listed here, and forbidden by th
 + `funChan`
 + `cont0`, `cont1` and `cont2`
 + `ignoreVar`
++ `valueComp`
++ `lresult` and `rresult`
++ `retrans`
 
 ## Running the tests
 
