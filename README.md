@@ -71,3 +71,21 @@ The available options are :
 + `-lambda` to parse lambda-calculus code and translate it into pi-calculus before execution
 
 The executable reads from a file if provided, or stdin if none was provided or reading from the file failed, until EOF (or Ctrl+D in command line) is met
+
+
+## [French] Retour sur projet 2 (http://perso.ens-lyon.fr/daniel.hirschkoff/P2)
+
+Nous avons pu remplir nos objectifs sur cette partie du projet :
+- Implémentation du pi-calcul
+- Puis, traduction du lambda-calcul (avec support des ref) vers le pi-calcul
+- Typage monomorphe du pi-calcul
+- Enfin, support d'une syntaxe plus proche de OCaml avec `let`, `x := bla`.
+
+Nous avons eu quelques difficultés pour gérer les deadlocks de Go lorsqu'un déséquilibre était présent sur les canaux (tous les canaux en attente de pouvoir envoyer ou recevoir).
+Ce problème a été partiellement résolu en autorisant par défaut les canaux à finir en attendant un message, et sur demande, ils peuvent être autorisés à terminer en attendant de pouvoir envoyer.
+
+Ce projet nous a en tout cas permis de nous initier à Go, ce qui était très intéressant ! Nous avons aussi pu parcourir la superbe doc de goyacc (bon courage pour la trouver!), mais une fois les bases posées nous ne nous en sommes pas si mal sortis.
+
+Nous avons aussi pu nous amuser à écrire des horreurs en Python pour effectuer les tests (mais avec un temps d'exécution correct contrairement au temps exponentiel que nous aurions eu avec une solution jolie mais naïve).
+
+Nous espérons en tout cas que les générations futures de la L3IF pourront aussi se frotter à Go qui a un côté non conventionnel mais fun et réfléchi et est donc incontournable.
