@@ -81,7 +81,7 @@ The executable reads from a file if provided, or stdin if none was provided or r
 ## A word about parsing
 Go comes with support of yacc through goyacc, but no proper lexer.
 Lexing is therefore done in a somewhat ugly but seemingly common way,
-directly in the .y file, by reading characters (calles runes) one by one.
+directly in the .y file, by reading characters (called runes) one by one.
 
 ## [French] Retour sur projet 2 (http://perso.ens-lyon.fr/daniel.hirschkoff/P2)
 
@@ -98,4 +98,4 @@ Ce projet nous a en tout cas permis de nous initier à Go, ce qui était très i
 
 Nous avons aussi pu nous amuser à écrire des horreurs en Python pour effectuer les tests (mais avec un temps d'exécution correct contrairement au temps exponentiel que nous aurions eu avec une solution jolie mais naïve).
 
-Nous espérons en tout cas que les générations futures de la L3IF pourront aussi se frotter à Go qui a un côté non conventionnel mais fun et réfléchi et est donc incontournable.
+Nous espérons en tout cas que les générations futures de la L3IF pourront aussi se frotter à Go qui a un côté non conventionnel mais fun et réfléchi.
