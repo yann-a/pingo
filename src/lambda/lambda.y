@@ -46,12 +46,12 @@ lambda:
   | LET VAR EQUAL lambda IN lambda                 { $$ = Lapp{Lfun{$2, $6}, $4}           }
   | NEW VAR EQUAL lambda IN lambda                 { $$ = New{$2, $4, $6}                  }
   | FUN VAR fundefinition                          { $$ = Lfun{$2, $3}                     }
-  | VAR LT MINUS litteral                          { $$ = Read{$1, $4, Lconst(0)}          }
-  | VAR LT MINUS litteral SEMICOLON lambda                      { $$ = Read{$1, $4, $6}     }
-  | litteral COLON EQUAL litteral                  { $$ = Write{$1, $4, Lconst(0)}         }
-  | litteral COLON EQUAL litteral SEMICOLON lambda              { $$ = Write{$1, $4, $6}    }
-  | VAR LT MINUS litteral COLON EQUAL litteral     { $$ = Swap{$1, $4, $7, Lconst(0)}      }
-  | VAR LT MINUS litteral COLON EQUAL litteral SEMICOLON lambda { $$ = Swap{$1, $4, $7, $9} }
+  | VAR LT MINUS value                             { $$ = Read{$1, $4, Lconst(0)}          }
+  | VAR LT MINUS value SEMICOLON lambda            { $$ = Read{$1, $4, $6}     }
+  | value COLON EQUAL value                        { $$ = Write{$1, $4, Lconst(0)}         }
+  | value COLON EQUAL value SEMICOLON lambda       { $$ = Write{$1, $4, $6}    }
+  | VAR LT MINUS value COLON EQUAL value           { $$ = Swap{$1, $4, $7, Lconst(0)}      }
+  | VAR LT MINUS value COLON EQUAL value SEMICOLON lambda { $$ = Swap{$1, $4, $7, $9} }
 
 fundefinition:
     MINUS GT lambda                                { $$ = $3                               }

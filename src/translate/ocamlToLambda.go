@@ -19,10 +19,19 @@ func ocamlToLambda(lexpr lambda.Lambda) lambda.Lambda {
 		case lambda.Div:
 			return lambda.Div{ocamlToLambda(v.L), ocamlToLambda(v.R)}
 		case lambda.Read:
+			_, ok := v.Ref.(lambda.Lvar)
+			if ok { return v }
+
 			return lambda.Lapp{lambda.Lfun{lambda.Lvar("thisvarshouldnotbeused"), lambda.Read{v.Var, lambda.Lvar("thisvarshouldnotbeused"), ocamlToLambda(v.Then)}}, ocamlToLambda(v.Ref)}
 		case lambda.Write:
+			_, ok := v.Ref.(lambda.Lvar)
+			if ok { return v }
+
 			return lambda.Lapp{lambda.Lfun{lambda.Lvar("thisvarshouldnotbeused"), lambda.Write{lambda.Lvar("thisvarshouldnotbeused"), v.Val, ocamlToLambda(v.Then)}}, ocamlToLambda(v.Ref)}
 		case lambda.Swap:
+			_, ok := v.Ref.(lambda.Lvar)
+			if ok { return v }
+	
 			return lambda.Lapp{lambda.Lfun{lambda.Lvar("thisvarshouldnotbeused"), lambda.Swap{v.Var, lambda.Lvar("thisvarshouldnotbeused"), v.Val, ocamlToLambda(v.Then)}}, ocamlToLambda(v.Ref)}
 		case lambda.New:
 			return lambda.New{v.Var, ocamlToLambda(v.Value), ocamlToLambda(v.Then)}
