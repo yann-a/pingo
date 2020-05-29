@@ -118,17 +118,17 @@ func innerTranslate(lexpr lambda.Lambda, channel int) pi.Expr {
 		)
 	case lambda.Read:
 		return pi.ReceiveThen{
-			string(v.Ref),
-			pi.Variable(v.Var),
+			string(v.Ref.(lambda.Lvar)),
+			pi.Variable(v.Var.(lambda.Lvar)),
 			pi.Parallel{
-				pi.Send{string(v.Ref), pi.Variable(v.Var)},
+				pi.Send{string(v.Ref.(lambda.Lvar)), pi.Variable(v.Var.(lambda.Lvar))},
 				innerTranslate(v.Then, channel),
 			},
 		}
 	case lambda.Write:
-		return translatePrimitives(pi.Variable("_"), string(v.Ref), v.Val, v.Then, channel, channel1)
+		return translatePrimitives(pi.Variable("_"), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
 	case lambda.Swap:
-		return translatePrimitives(pi.Variable(v.Var), string(v.Ref), v.Val, v.Then, channel, channel1)
+		return translatePrimitives(pi.Variable(v.Var.(lambda.Lvar)), string(v.Ref.(lambda.Lvar)), v.Val, v.Then, channel, channel1)
 	case lambda.New:
 		var t pi.Terminal = translateLambdaTerminal(v.Value)
 		if t == nil { // Si l'expression écrit n'est pas simple

@@ -48,6 +48,7 @@ lambda:
   | FUN VAR fundefinition                          { $$ = Lfun{$2, $3}                     }
   | VAR LT MINUS VAR SEMICOLON lambda              { $$ = Read{$1, $4, $6}                 }
   | VAR COLON EQUAL litteral SEMICOLON lambda      { $$ = Write{$1, $4, $6}                }
+  | LPAREN lambda RPAREN COLON EQUAL litteral SEMICOLON lambda { $$ = Write{$2, $6, $8}    }
   | VAR LT MINUS VAR COLON EQUAL litteral SEMICOLON lambda { $$ = Swap{$1, $4, $7, $9}     }
 
 fundefinition:
