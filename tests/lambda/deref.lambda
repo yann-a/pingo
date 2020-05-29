@@ -1,1 +1,1 @@
-new ref = 3 in (fun x y -> z<-ref; print (z + x + y)) (!ref) (print 6)
+new ref = 3 in (fun xx yy -> zz<-ref; print (zz + xx + yy)) (!ref) (print 6)
