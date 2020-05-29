@@ -50,7 +50,7 @@ For lambda-calculus+ref+"ocaml":
 + `x <- a := v; l` (swap): evaluate v, assign the value contained in a to x and replace it by v. 
 
 For the three last constructions, note that :
-+ a can also be an expression that returns a reference.
++ `a` can also be an expression that returns a reference.
 + `; l` is optionnal, its default value is `; 0`
 
 ## Reserved names ##
