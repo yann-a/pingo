@@ -39,14 +39,18 @@ For pi-calculus:
 + `[x=y]P` or `[x!=y]P` : run P if the condition between brackets is met
 + `a(x).P + b(x).Q` : non-deterministic choice : we go on with P if we read from `a` first, or Q if we read from `b`
 
-For lambda-calculus+ref:
+For lambda-calculus+ref+"ocaml":
 + `fun x -> l` : the function that associates l to the variable x
 + `m n` : apply the function m to argument n
 + `new r = v in l` : initialize r to a reference containing v, then execute l
-+ `x <- a` (read): assign the value contained in reference a to x
-+ `a := x` (write): assign the value x to ref a
-+ `x <- a := v` (swap): evaluate v, assign the value contained in a to x and replace it by v
++ `x <- a` (read): assign the value contained in reference a to x. Note that a can also be an expression that returns a reference.
++ `a := x` (write): assign the value x to ref a. Note that a can also be an expression that returns a reference.
++ `x <- a := v` (swap): evaluate v, assign the value contained in a to x and replace it by v. Note that a can also be an expression that returns a reference.
 + `!r` : get the value contained in ref r
++ `let x = v in l` : binds the name x to v in l
+
+## Reserved names ##
+Some names are reserved in lambda. They are listed here, and forbidden by the parser anyway :
 
 ## Running the tests
 

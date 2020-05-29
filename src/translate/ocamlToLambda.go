@@ -1,40 +1,33 @@
 package translate
 
-import (
-	"fmt"
-	"pingo/src/lambda"
-)
+import "pingo/src/lambda"
 
-func ocamlToLambda(lexpr lambda.Lambda, n *int) lambda.Lambda {
+
+// Performs the caml -> lambdaref translation
+func ocamlToLambda(lexpr lambda.Lambda) lambda.Lambda {
 	switch v := lexpr.(type) {
 		case lambda.Lfun:
-			return lambda.Lfun{v.Arg, ocamlToLambda(v.Exp, n)}
+			return lambda.Lfun{v.Arg, ocamlToLambda(v.Exp)}
 		case lambda.Lapp:
-			return lambda.Lapp{ocamlToLambda(v.Fun, n), ocamlToLambda(v.Exp, n)}
+			return lambda.Lapp{ocamlToLambda(v.Fun), ocamlToLambda(v.Exp)}
 		case lambda.Add:
-			return lambda.Add{ocamlToLambda(v.L, n), ocamlToLambda(v.R, n)}
+			return lambda.Add{ocamlToLambda(v.L), ocamlToLambda(v.R)}
 		case lambda.Sub:
-			return lambda.Sub{ocamlToLambda(v.L, n), ocamlToLambda(v.R, n)}
+			return lambda.Sub{ocamlToLambda(v.L), ocamlToLambda(v.R)}
 		case lambda.Mult:
-			return lambda.Mult{ocamlToLambda(v.L, n), ocamlToLambda(v.R, n)}
+			return lambda.Mult{ocamlToLambda(v.L), ocamlToLambda(v.R)}
 		case lambda.Div:
-			return lambda.Div{ocamlToLambda(v.L, n), ocamlToLambda(v.R, n)}
+			return lambda.Div{ocamlToLambda(v.L), ocamlToLambda(v.R)}
 		case lambda.Read:
-			n0 := *n
-			*n = n0+1
-			return lambda.Lapp{lambda.Lfun{lambda.Lvar(fmt.Sprintf("thisvarshouldnotbeused%d", n0)), lambda.Read{v.Var, lambda.Lvar(fmt.Sprintf("thisvarshouldnotbeused%d", n0)), ocamlToLambda(v.Then, n)}}, ocamlToLambda(v.Ref, n)}
+			return lambda.Lapp{lambda.Lfun{lambda.Lvar("thisvarshouldnotbeused"), lambda.Read{v.Var, lambda.Lvar("thisvarshouldnotbeused"), ocamlToLambda(v.Then)}}, ocamlToLambda(v.Ref)}
 		case lambda.Write:
-			n0 := *n
-			*n = n0+1
-			return lambda.Lapp{lambda.Lfun{lambda.Lvar(fmt.Sprintf("thisvarshouldnotbeused%d", n0)), lambda.Write{lambda.Lvar(fmt.Sprintf("thisvarshouldnotbeused%d", n0)), v.Val, ocamlToLambda(v.Then, n)}}, ocamlToLambda(v.Ref, n)}
+			return lambda.Lapp{lambda.Lfun{lambda.Lvar("thisvarshouldnotbeused"), lambda.Write{lambda.Lvar("thisvarshouldnotbeused"), v.Val, ocamlToLambda(v.Then)}}, ocamlToLambda(v.Ref)}
 		case lambda.Swap:
-			n0 := *n
-			*n = n0+1
-			return lambda.Lapp{lambda.Lfun{lambda.Lvar(fmt.Sprintf("thisvarshouldnotbeused%d", n0)), lambda.Swap{v.Var, lambda.Lvar(fmt.Sprintf("thisvarshouldnotbeused%d", n0)), v.Val, ocamlToLambda(v.Then, n)}}, ocamlToLambda(v.Ref, n)}
+			return lambda.Lapp{lambda.Lfun{lambda.Lvar("thisvarshouldnotbeused"), lambda.Swap{v.Var, lambda.Lvar("thisvarshouldnotbeused"), v.Val, ocamlToLambda(v.Then)}}, ocamlToLambda(v.Ref)}
 		case lambda.New:
-			return lambda.New{v.Var, ocamlToLambda(v.Value, n), ocamlToLambda(v.Then, n)}
+			return lambda.New{v.Var, ocamlToLambda(v.Value), ocamlToLambda(v.Then)}
 		case lambda.Deref:
-			return lambda.Deref{ocamlToLambda(v.Name, n)}
+			return lambda.Deref{ocamlToLambda(v.Name)}
 		default:
 			return v
 	}

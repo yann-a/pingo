@@ -6,12 +6,13 @@ import (
 	"pingo/src/pi"
 )
 
+// Performs the ocaml -> pi translation
 func Translate(lexpr lambda.Lambda, channel int) pi.Expr {
-	n := 0
-	tr1 := ocamlToLambda(lexpr, &n)
-	//fmt.Println(tr1)
-	translation := innerTranslate(tr1, channel)
+	// We start by performing the ocaml -> lambda translation
+	// And then cell the lambda -> pi one
+	translation := innerTranslate(ocamlToLambda(lexpr), channel)
 
+	// And wrap it to interpret print correctly
 	return pi.Parallel{
 		translation,
 
